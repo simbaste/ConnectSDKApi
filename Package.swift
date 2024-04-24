@@ -5,19 +5,35 @@ import PackageDescription
 
 let package = Package(
     name: "ConnectSDK-iOS-Package",
+    platforms: [
+        .iOS(.v12)
+    ],
     products: [
         // Products define the executables and libraries a package produces, making them visible to other packages.
         .library(
-            name: "ConnectSDK-iOS-Package",
-            targets: ["ConnectSDK-iOS-Package"]),
+            name: "ConnectSDKApi",
+            targets: ["ConnectSDKApi", "ConnectSDK", "LGCast", "GStreamerForLGCast"]),
     ],
     targets: [
         // Targets are the basic building blocks of a package, defining a module or a test suite.
         // Targets can depend on other targets in this package and products from dependencies.
         .target(
-            name: "ConnectSDK-iOS-Package"),
+            name: "ConnectSDKApi"
+        ),
+        .binaryTarget(
+            name: "ConnectSDK",
+            path: "Libraries/ConnectSDK.xcframework"
+        ),
+        .binaryTarget(
+            name: "LGCast",
+            path: "Libraries/LGCast.xcframework"
+        ),
+        .binaryTarget(
+            name: "GStreamerForLGCast",
+            path: "Libraries/GStreamerForLGCast.xcframework"
+        ),
         .testTarget(
-            name: "ConnectSDK-iOS-PackageTests",
-            dependencies: ["ConnectSDK-iOS-Package"]),
+            name: "ConnectSDKApiTests",
+            dependencies: ["ConnectSDKApi", "ConnectSDK", "LGCast", "GStreamerForLGCast"]),
     ]
 )

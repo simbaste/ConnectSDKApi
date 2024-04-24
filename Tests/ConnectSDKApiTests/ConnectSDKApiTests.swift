@@ -1,7 +1,7 @@
 import XCTest
 @testable import ConnectSDK_iOS_Package
 
-final class ConnectSDK_iOS_PackageTests: XCTestCase {
+final class ConnectSDKApiTests: XCTestCase {
     func testExample() throws {
         // XCTest Documentation
         // https://developer.apple.com/documentation/xctest
