@@ -6,11 +6,11 @@
 //
 
 import Foundation
-import LGCast
+import ConnectSDK
 
 public protocol ConnectSDKDelegate: AnyObject {
-//    func didFindDevices(_ devices: [ConnectableDevice])
-//    func didFailWithError(_ error: Error)
-//    func device(didConnected device: ConnectableDevice)
-//    func device(didDisconnected device: ConnectableDevice, withError error: Error)
+    func didFindDevices(_ devices: [ConnectableDevice])
+    func didFailWithError(_ error: Error)
+    func device(didConnected device: ConnectableDevice)
+    func device(didDisconnected device: ConnectableDevice, withError error: Error)
 }
