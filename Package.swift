@@ -4,7 +4,7 @@
 import PackageDescription
 
 let package = Package(
-    name: "ConnectSDK-iOS-Package",
+    name: "ConnectSDKApi",
     platforms: [
         .iOS(.v12)
     ],
