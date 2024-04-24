@@ -38,6 +38,11 @@ public class ConnectSDKApi: NSObject,
         delegate?.didFindDevices(Array(discoveredDevices))
     }
     
+    public func discoveryManager(_ manager: DiscoveryManager!, didUpdate device: ConnectableDevice!) {
+        discoveredDevices.update(with: device)
+        delegate?.didFindDevices(Array(discoveredDevices))
+    }
+    
     public func connectableDeviceReady(_ device: ConnectableDevice!) {
         delegate?.device(didConnected: device)
     }
