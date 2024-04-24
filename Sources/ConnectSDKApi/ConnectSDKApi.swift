@@ -11,7 +11,7 @@ public class ConnectSDKApi: NSObject,
     
     public weak var delegate: ConnectSDKDelegate?
     private let discovereyManager: DiscoveryManager
-    private var discoveredDevices: [ConnectableDevice] = []
+    private var discoveredDevices: Set<ConnectableDevice> = Set()
     
     public override init() {
         discovereyManager = DiscoveryManager.shared()
@@ -29,16 +29,13 @@ public class ConnectSDKApi: NSObject,
     }
     
     public func discoveryManager(_ manager: DiscoveryManager!, didFind device: ConnectableDevice!) {
-        discoveredDevices.append(device)
-        delegate?.didFindDevices(discoveredDevices)
+        discoveredDevices.insert(device)
+        delegate?.didFindDevices(Array(discoveredDevices))
     }
     
     public func discoveryManager(_ manager: DiscoveryManager!, didLose device: ConnectableDevice!) {
-        // Retirer l'appareil perdu de la liste des appareils découverts
-        if let index = discoveredDevices.firstIndex(of: device) {
-            discoveredDevices.remove(at: index)
-        }
-        delegate?.didFindDevices(discoveredDevices)
+        discoveredDevices.remove(device)
+        delegate?.didFindDevices(Array(discoveredDevices))
     }
     
     public func connectableDeviceReady(_ device: ConnectableDevice!) {
