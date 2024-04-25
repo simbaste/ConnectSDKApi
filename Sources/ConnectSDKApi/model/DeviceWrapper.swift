@@ -14,7 +14,7 @@ public class DeviceWrapper: NSObject, ConnectableDeviceDelegate {
     private let fakeDevice: FakeDevice?
     public var delegate: ConnectableDeviceWrapperDelegate? = nil
 
-    init(_ device: ConnectableDevice?, _ fakeDevice: FakeDevice? = nil) {
+    public init(_ device: ConnectableDevice?, _ fakeDevice: FakeDevice? = nil) {
         self.device = device
         self.fakeDevice = fakeDevice
         super.init()
