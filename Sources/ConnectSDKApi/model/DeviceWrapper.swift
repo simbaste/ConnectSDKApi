@@ -27,6 +27,10 @@ public class DeviceWrapper: NSObject, ConnectableDeviceDelegate {
         return device.description
     }
     
+    var isConnected: Bool {
+        return device.connected
+    }
+    
     // MARK: - Functions
     
     public func connect() {
