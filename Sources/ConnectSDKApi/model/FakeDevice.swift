@@ -10,4 +10,11 @@ public struct FakeDevice {
     var description: String
     var isConnected: Bool
     weak var delegate: ConnectableDeviceWrapperDelegate?
+    
+    public init(name: String, description: String, isConnected: Bool, delegate: ConnectableDeviceWrapperDelegate? = nil) {
+        self.name = name
+        self.description = description
+        self.isConnected = isConnected
+        self.delegate = delegate
+    }
 }
