@@ -4,14 +4,12 @@
 import Foundation
 import ConnectSDK
 
-public class ConnectSDKApi: NSObject,
-    ConnectableDeviceDelegate,
+public class ConnectSDKWrapper: NSObject,
     DiscoveryManagerDelegate {
     
-    
-    public weak var delegate: ConnectSDKDelegate?
+    public weak var delegate: DiscoveryManagerWrapperDelegate?
     private let discovereyManager: DiscoveryManager
-    private var discoveredDevices: Set<ConnectableDevice> = Set()
+    private var discoveredDevices: Set<DeviceWrapper> = Set()
     
     public override init() {
         discovereyManager = DiscoveryManager.shared()
@@ -29,27 +27,18 @@ public class ConnectSDKApi: NSObject,
     }
     
     public func discoveryManager(_ manager: DiscoveryManager!, didFind device: ConnectableDevice!) {
-        discoveredDevices.insert(device)
-        delegate?.didFindDevices(Array(discoveredDevices))
+        discoveredDevices.insert(DeviceWrapper(device: device))
+        delegate?.didFind(Array(discoveredDevices))
     }
     
     public func discoveryManager(_ manager: DiscoveryManager!, didLose device: ConnectableDevice!) {
-        discoveredDevices.remove(device)
-        delegate?.didFindDevices(Array(discoveredDevices))
+        discoveredDevices.remove(DeviceWrapper(device: device))
+        delegate?.didFind(Array(discoveredDevices))
     }
     
     public func discoveryManager(_ manager: DiscoveryManager!, didUpdate device: ConnectableDevice!) {
-        discoveredDevices.update(with: device)
-        delegate?.didFindDevices(Array(discoveredDevices))
+        discoveredDevices.update(with: DeviceWrapper(device: device))
+        delegate?.didFind(Array(discoveredDevices))
     }
-    
-    public func connectableDeviceReady(_ device: ConnectableDevice!) {
-        delegate?.device(didConnected: device)
-    }
-    
-    public func connectableDeviceDisconnected(_ device: ConnectableDevice!, withError error: (any Error)!) {
-        delegate?.device(didDisconnected: device, withError: error)
-    }
-    
     
 }
