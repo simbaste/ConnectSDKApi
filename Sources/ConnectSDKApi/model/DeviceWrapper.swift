@@ -27,7 +27,7 @@ public class DeviceWrapper: NSObject, ConnectableDeviceDelegate {
         return device.description
     }
     
-    var isConnected: Bool {
+    public var isConnected: Bool {
         return device.connected
     }
     
