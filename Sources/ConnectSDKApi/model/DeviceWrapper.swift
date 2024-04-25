@@ -10,45 +10,47 @@ import ConnectSDK
 
 public class DeviceWrapper: NSObject, ConnectableDeviceDelegate {
 
-    private let device: ConnectableDevice
+    private let device: ConnectableDevice!
+    private let fakeDevice: FakeDevice?
     public var delegate: ConnectableDeviceWrapperDelegate? = nil
 
-    init(device: ConnectableDevice) {
+    init(_ device: ConnectableDevice?, _ fakeDevice: FakeDevice? = nil) {
         self.device = device
+        self.fakeDevice = fakeDevice
         super.init()
-        device.delegate = self
+        device?.delegate = self
     }
     
-    public var name: String {
-        return device.friendlyName
+    public var name: String? {
+        return device?.friendlyName ?? fakeDevice?.name
     }
     
     public override var description: String {
-        return device.description
+        return device?.description ?? fakeDevice?.description ?? super.description
     }
     
     public var isConnected: Bool {
-        return device.connected
+        return device?.connected ?? fakeDevice?.isConnected ?? false
     }
     
     // MARK: - Functions
     
     public func connect() {
-        device.connect()
+        device?.connect()
     }
     
     public func disconnect() {
-        device.disconnect()
+        device?.disconnect()
     }
     
     // MARK: - Delegate
     
     public func connectableDeviceReady(_ device: ConnectableDevice!) {
-        delegate?.device(didConnected: DeviceWrapper(device: device))
+        delegate?.device(didConnected: DeviceWrapper(device))
     }
     
     public func connectableDeviceDisconnected(_ device: ConnectableDevice!, withError error: (any Error)!) {
-        delegate?.device(didDisconnected: DeviceWrapper(device: device), withError: error)
+        delegate?.device(didDisconnected: DeviceWrapper(device), withError: error)
     }
     
 }

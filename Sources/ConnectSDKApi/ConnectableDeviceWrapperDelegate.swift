@@ -8,7 +8,7 @@
 import Foundation
 import ConnectSDK
 
-public protocol ConnectableDeviceWrapperDelegate {
+public protocol ConnectableDeviceWrapperDelegate: AnyObject {
     func device(didConnected device: DeviceWrapper)
     func device(didDisconnected device: DeviceWrapper, withError error: Error)
 }

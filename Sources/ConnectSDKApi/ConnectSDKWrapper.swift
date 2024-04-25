@@ -27,17 +27,17 @@ public class ConnectSDKWrapper: NSObject,
     }
     
     public func discoveryManager(_ manager: DiscoveryManager!, didFind device: ConnectableDevice!) {
-        discoveredDevices.insert(DeviceWrapper(device: device))
+        discoveredDevices.insert(DeviceWrapper(device))
         delegate?.didFind(Array(discoveredDevices))
     }
     
     public func discoveryManager(_ manager: DiscoveryManager!, didLose device: ConnectableDevice!) {
-        discoveredDevices.remove(DeviceWrapper(device: device))
+        discoveredDevices.remove(DeviceWrapper(device))
         delegate?.didFind(Array(discoveredDevices))
     }
     
     public func discoveryManager(_ manager: DiscoveryManager!, didUpdate device: ConnectableDevice!) {
-        discoveredDevices.update(with: DeviceWrapper(device: device))
+        discoveredDevices.update(with: DeviceWrapper(device))
         delegate?.didFind(Array(discoveredDevices))
     }
     
