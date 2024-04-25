@@ -26,6 +26,10 @@ public class ConnectSDKWrapper: NSObject,
         self.discovereyManager.startDiscovery()
     }
     
+    public func stopSearchingForDevices() {
+        self.discovereyManager.stopDiscovery()
+    }
+    
     public func discoveryManager(_ manager: DiscoveryManager!, didFind device: ConnectableDevice!) {
         discoveredDevices.insert(DeviceWrapper(device))
         delegate?.didFind(Array(discoveredDevices))
