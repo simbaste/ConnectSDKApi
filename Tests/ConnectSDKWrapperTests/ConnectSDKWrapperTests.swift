@@ -1,7 +1,7 @@
 import XCTest
-@testable import ConnectSDK_iOS_Package
+@testable import ConnectSDKWrapper
 
-final class ConnectSDKApiTests: XCTestCase {
+final class ConnectSDKWrapperTests: XCTestCase {
     func testExample() throws {
         // XCTest Documentation
         // https://developer.apple.com/documentation/xctest

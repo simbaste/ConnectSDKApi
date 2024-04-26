@@ -4,21 +4,21 @@
 import PackageDescription
 
 let package = Package(
-    name: "ConnectSDKApi",
+    name: "ConnectSDKWrapper",
     platforms: [
         .iOS(.v12)
     ],
     products: [
         // Products define the executables and libraries a package produces, making them visible to other packages.
         .library(
-            name: "ConnectSDKApi",
-            targets: ["ConnectSDKApi", "ConnectSDK", "LGCast", "GStreamerForLGCast"]),
+            name: "ConnectSDKWrapper",
+            targets: ["ConnectSDKWrapper", "ConnectSDK", "LGCast", "GStreamerForLGCast"]),
     ],
     targets: [
         // Targets are the basic building blocks of a package, defining a module or a test suite.
         // Targets can depend on other targets in this package and products from dependencies.
         .target(
-            name: "ConnectSDKApi"
+            name: "ConnectSDKWrapper"
         ),
         .binaryTarget(
             name: "ConnectSDK",
@@ -33,7 +33,7 @@ let package = Package(
             path: "Libraries/GStreamerForLGCast.xcframework"
         ),
         .testTarget(
-            name: "ConnectSDKApiTests",
-            dependencies: ["ConnectSDKApi", "ConnectSDK", "LGCast", "GStreamerForLGCast"]),
+            name: "ConnectSDKWrapperTests",
+            dependencies: ["ConnectSDKWrapper", "ConnectSDK", "LGCast", "GStreamerForLGCast"]),
     ]
 )
