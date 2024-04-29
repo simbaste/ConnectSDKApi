@@ -11,6 +11,7 @@ import ConnectSDK
 public class DeviceWrapper: NSObject, ConnectableDeviceDelegate {
 
     private let device: ConnectableDevice!
+    private var browserSession: LaunchSession? = nil
     private let fakeDevice: FakeDevice?
     public var delegate: ConnectableDeviceWrapperDelegate? = nil
 
@@ -23,6 +24,10 @@ public class DeviceWrapper: NSObject, ConnectableDeviceDelegate {
     
     public var name: String? {
         return device?.friendlyName ?? fakeDevice?.name
+    }
+    
+    private var address: String? {
+        return device?.address
     }
     
     public override var description: String {
@@ -43,6 +48,42 @@ public class DeviceWrapper: NSObject, ConnectableDeviceDelegate {
         device?.disconnect()
     }
     
+    public func openBrowser(
+        with urlString: String,
+        success: @escaping (_ launchSession: LaunchSession?) -> Void,
+        failure: @escaping (_ error: Error?) -> Void
+    ) {
+            
+        if let url = URL(string: urlString),
+           let launcher = device?.launcher() {
+            
+            launcher.launchBrowser(url, success: { session in
+                print("google opened ")
+                if self.device.hasCapability(kLauncherAppClose) {
+                    self.browserSession = session
+                    success(session)
+                }
+            }, failure: { error in
+                failure(error)
+            })
+            
+        } else {
+            let error = NSError(domain: "com.netgem", code: 1001, userInfo: [NSLocalizedDescriptionKey: "Invalid URL string: \(urlString)"])
+            failure(error)
+        }
+    }
+    
+    public func closeBrowser(
+        success: @escaping (_ res: Any?) -> Void,
+        failure: @escaping (_ error: Error?) -> Void
+    ) {
+        self.browserSession?.close(success: { res in
+            success(res)
+        }, failure: { err in
+            failure(err)
+        })
+    }
+    
     // MARK: - Delegate
     
     public func connectableDeviceReady(_ device: ConnectableDevice!) {
@@ -53,4 +94,16 @@ public class DeviceWrapper: NSObject, ConnectableDeviceDelegate {
         delegate?.device(didDisconnected: DeviceWrapper(device), withError: error)
     }
     
+    // MARK: - Comparaison between two devices
+    
+    public override func isEqual(_ object: Any?) -> Bool {
+        guard let other = object as? DeviceWrapper else { return false }
+        return self.name == other.name
+    }
+
+    public override var hash: Int {
+        return name?.hash ?? 0
+    }
+    
 }
+
