@@ -1,29 +1,91 @@
-# README #
+# ConnectSDKWrapper
 
-This README would normally document whatever steps are necessary to get your application up and running.
+ConnectSDKWrapper is a Swift package that provides a wrapper around the LG WebOS ConnectSDK, allowing you to easily integrate LG WebOS devices into your iOS applications.
 
-### What is this repository for? ###
+## Installation
 
-* Quick summary
-* Version
-* [Learn Markdown](https://bitbucket.org/tutorials/markdowndemo)
+You can install ConnectSDKWrapper via Swift Package Manager. Add the following URL to your Xcode project's Swift Packages tab:
 
-### How do I get set up? ###
+```
+git@bitbucket.org:netgem/connectsdkwrapper-ios.git
+```
 
-* Summary of set up
-* Configuration
-* Dependencies
-* Database configuration
-* How to run tests
-* Deployment instructions
+Or use the HTTPS URL:
 
-### Contribution guidelines ###
+```
+https://bitbucket.org/netgem/connectsdkwrapper-ios.git
+```
 
-* Writing tests
-* Code review
-* Other guidelines
+## Usage
 
-### Who do I talk to? ###
+### Importing
 
-* Repo owner or admin
-* Other community or team contact
+To use ConnectSDKWrapper in your Swift code, simply import the module:
+
+```swift
+import ConnectSDKWrapper
+```
+
+### Discovery
+
+Discover LG WebOS devices on the network:
+
+```swift
+let connectSDKWrapper = ConnectSDKWrapper()
+
+// Set the delegate to receive discovery events
+connectSDKWrapper.delegate = self
+
+// Start device discovery
+connectSDKWrapper.searchForDevices()
+```
+
+Implement `DiscoveryManagerWrapperDelegate` to receive discovery events:
+
+```swift
+extension YourViewController: DiscoveryManagerWrapperDelegate {
+    func didFind(_ devices: [DeviceWrapper]) {
+        // Handle discovered devices
+    }
+    
+    func didFail(with error: Error) {
+        // Handle discovery failure
+    }
+}
+```
+
+### Connection
+
+Connect to a discovered device:
+
+```swift
+deviceWrapper.connect()
+```
+
+Handle device connection and disconnection events by implementing `ConnectableDeviceWrapperDelegate`.
+
+### Browser Control
+
+Open and close the browser on the connected device:
+
+```swift
+deviceWrapper.openBrowser(with: "https://www.example.com", success: { launchSession in
+    // Handle success
+}, failure: { error in
+    // Handle failure
+})
+
+deviceWrapper.closeBrowser(success: { result in
+    // Handle success
+}, failure: { error in
+    // Handle failure
+})
+```
+
+## Example
+
+For a complete demonstration of how to use ConnectSDKWrapper, check out the included Example project.
+
+## License
+
+ConnectSDKWrapper is available under the MIT license. See the [LICENSE](LICENSE) file for more information.
