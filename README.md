@@ -82,9 +82,11 @@ deviceWrapper.closeBrowser(success: { result in
 })
 ```
 
-## Example
+## Example Project
 
-For a complete demonstration of how to use ConnectSDKWrapper, check out the included Example project.
+For a complete demonstration of how to use ConnectSDKWrapper in your iOS application, check out the included Example project available [here](https://github.com/simbaste/ConnectSDK-iOS-Sample).
+
+The example project showcases various features of ConnectSDKWrapper, including device discovery, connection, and browser control. You can use it as a reference or starting point for integrating ConnectSDKWrapper into your own project.
 
 ## License
 
