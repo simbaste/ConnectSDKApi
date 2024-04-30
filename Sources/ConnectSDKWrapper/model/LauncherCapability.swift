@@ -8,9 +8,12 @@
 import Foundation
 import ConnectSDK
 
+/**
+ An enumeration representing launcher capabilities.
+ */
 public enum LauncherCapability: String {
     case any = "Launcher.Any"
-
+    
     case app = "Launcher.App"
     case appParams = "Launcher.App.Params"
     case appClose = "Launcher.App.Close"

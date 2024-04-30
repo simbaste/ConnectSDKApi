@@ -7,6 +7,9 @@
 
 import Foundation
 
+/**
+ An enumeration representing volume control capabilities.
+ */
 public enum VolumeControl: String {
     case any = "VolumeControl.Any"
     
@@ -18,4 +21,3 @@ public enum VolumeControl: String {
     case muteSet = "VolumeControl.Mute.Set"
     case muteSubscribe = "VolumeControl.Mute.Subscribe"
 }
-

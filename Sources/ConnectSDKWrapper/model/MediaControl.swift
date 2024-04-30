@@ -7,6 +7,9 @@
 
 import Foundation
 
+/**
+ An enumeration representing media control capabilities.
+ */
 public enum MediaControl: String {
     case any = "MediaControl.Any"
     

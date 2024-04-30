@@ -7,6 +7,11 @@
 
 import Foundation
 
+/**
+ A custom error type representing errors in the ConnectSDKWrapper library.
+ */
 public struct CustomError: Error {
+    /// The error message.
     let message: String
 }
+

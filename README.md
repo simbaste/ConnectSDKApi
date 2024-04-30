@@ -82,11 +82,25 @@ deviceWrapper.closeBrowser(success: { result in
 })
 ```
 
+### Device Service Capabilities
+
+Check if a device supports certain capabilities:
+
+```swift
+if deviceWrapper.hasCapability(.appClose) {
+    // Device supports closing apps
+}
+
+if deviceWrapper.hasCapabilities([.play, .pause, .stop]) {
+    // Device supports media playback controls
+}
+```
+
 ## Example Project
 
 For a complete demonstration of how to use ConnectSDKWrapper in your iOS application, check out the included Example project available [here](https://github.com/simbaste/ConnectSDK-iOS-Sample).
 
-The example project showcases various features of ConnectSDKWrapper, including device discovery, connection, and browser control. You can use it as a reference or starting point for integrating ConnectSDKWrapper into your own project.
+The example project showcases various features of ConnectSDKWrapper, including device discovery, connection, browser control, and more. You can use it as a reference or starting point for integrating ConnectSDKWrapper into your own project.
 
 ## License
 
