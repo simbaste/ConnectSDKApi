@@ -22,8 +22,9 @@ public class ConnectSDKWrapperBuilder {
      - Parameters:
        - platforms: A dictionary containing the platform names and their associated discovery provider names.
      */
-    public func setConnectSDKPlatforms(platforms: [String: String]) {
+    public func setConnectSDKPlatforms(platforms: [String: String]) -> Self {
         ConnectSDKWrapper.defaultPlatforms = platforms
+        return self
     }
     
     /**
