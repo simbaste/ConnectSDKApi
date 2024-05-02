@@ -97,6 +97,8 @@ deviceWrapper.closeBrowser(success: { result in
 })
 ```
 
+### Media Player
+
 To play a video media using the `makeMediaBuilder()` function, you first need to create an instance of `DeviceWrapper` and then call the `makeMediaBuilder()` function on that instance. Here's how you can do it:
 
 ```swift
