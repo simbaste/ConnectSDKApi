@@ -277,7 +277,7 @@ public class DeviceWrapper: NSObject, ConnectableDeviceDelegate {
         success: @escaping (_ launchObject: MediaLaunchObject?) -> Void,
         failure: @escaping (_ error: Error?) -> Void
     ) {
-        device.mediaPlayer().playMedia(with: mediaInfo, shouldLoop: shouldLoop) { mediaLaunchObject in
+        device?.mediaPlayer()?.playMedia(with: mediaInfo, shouldLoop: shouldLoop) { mediaLaunchObject in
             self.launchObject = mediaLaunchObject
             success(mediaLaunchObject)
         } failure: { error in
