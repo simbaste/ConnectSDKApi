@@ -30,17 +30,33 @@ import ConnectSDKWrapper
 
 Discover LG WebOS devices on the network:
 
+You can use the `ConnectSDKWrapperBuilder` to build an instance of `ConnectSDKWrapper` with customized configurations. Here's how you can do it:
+
 ```swift
-let connectSDKWrapper = ConnectSDKWrapper()
+import ConnectSDKWrapper
 
-// Set the delegate to receive discovery events
-connectSDKWrapper.delegate = self
+// Create a builder instance
+let builder = ConnectSDKWrapperBuilder()
 
-// Start device discovery
-connectSDKWrapper.searchForDevices()
+// Set the delegate
+builder.setDelegate(self)
+
+// Set custom discovery manager (optional)
+let customDiscoveryManager = CustomDiscoveryManager()
+builder.setDiscoveryManager(customDiscoveryManager)
+
+// Set custom platforms (optional)
+let customPlatforms = [
+    "WebOSTVService": "SSDPDiscoveryProvider",
+    "CastService": "CastDiscoveryProvider"
+]
+builder.setConnectSDKPlatforms(platforms: customPlatforms)
+
+// Build the ConnectSDKWrapper instance
+let connectSDKWrapper = builder.build()
 ```
 
-Implement `DiscoveryManagerWrapperDelegate` to receive discovery events:
+Ensure that you conform to the `DiscoveryManagerWrapperDelegate` protocol to receive discovery events:
 
 ```swift
 extension YourViewController: DiscoveryManagerWrapperDelegate {

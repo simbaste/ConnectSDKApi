@@ -8,11 +8,23 @@ import ConnectSDK
  A wrapper for the ConnectSDK DiscoveryManager.
  */
 public class ConnectSDKWrapper: NSObject, DiscoveryManagerDelegate {
+    
+    static var defaultPlatforms: [String: String] = [
+        "AirPlayService": "ZeroConfDiscoveryProvider",
+        "DIALService": "SSDPDiscoveryProvider",
+        "DLNAService": "SSDPDiscoveryProvider",
+        "NetcastTVService": "SSDPDiscoveryProvider",
+        "RokuService": "SSDPDiscoveryProvider",
+        "WebOSTVService": "SSDPDiscoveryProvider",
+        "CastService": "CastDiscoveryProvider",
+        "FireTVService": "FireTVDiscoveryProvider"
+    ]
+    
     /// The delegate for handling discovery events.
     public weak var delegate: DiscoveryManagerWrapperDelegate?
     
     /// The underlying ConnectSDK DiscoveryManager.
-    private let discovereyManager: DiscoveryManager
+    var discoveryManager: DiscoveryManager
     
     /// The set of discovered devices.
     private var discoveredDevices: Set<DeviceWrapper> = Set()
@@ -20,12 +32,18 @@ public class ConnectSDKWrapper: NSObject, DiscoveryManagerDelegate {
     /**
      Initializes a new ConnectSDKWrapper.
      */
-    public override init() {
-        discovereyManager = DiscoveryManager.shared()
+    override init() {
+        discoveryManager = DiscoveryManager.shared()
         super.init()
-        discovereyManager.delegate = self
+        discoveryManager.delegate = self
         AirPlayService.setAirPlayServiceMode(AirPlayServiceModeMedia)
         DIALService.registerApp("Levak")
+    }
+    
+    public func destry() {
+        self.discoveredDevices.removeAll()
+        self.discoveryManager.stopDiscovery()
+        unregisterServices()
     }
     
     /**
@@ -33,16 +51,14 @@ public class ConnectSDKWrapper: NSObject, DiscoveryManagerDelegate {
      */
     public func searchForDevices() {
         self.discoveredDevices.removeAll()
-        discovereyManager.pairingLevel = DeviceServicePairingLevelOn
-        discovereyManager.registerDefaultServices()
-        self.discovereyManager.startDiscovery()
+        self.discoveryManager.startDiscovery()
     }
     
     /**
      Stops searching for devices.
      */
     public func stopSearchingForDevices() {
-        self.discovereyManager.stopDiscovery()
+        self.discoveryManager.stopDiscovery()
     }
     
     /**
@@ -55,6 +71,24 @@ public class ConnectSDKWrapper: NSObject, DiscoveryManagerDelegate {
     public func discoveryManager(_ manager: DiscoveryManager!, didFind device: ConnectableDevice!) {
         discoveredDevices.insert(DeviceWrapper(device))
         delegate?.didFind(Array(discoveredDevices))
+    }
+    
+    func registerServices() {
+        ConnectSDKWrapper.defaultPlatforms.forEach { platformClassName, discoveryProviderClassName in
+            if let platformClass = NSClassFromString(platformClassName) as? NSObject.Type,
+               let discoveryProviderClass = NSClassFromString(discoveryProviderClassName) as? DiscoveryProvider.Type {
+                discoveryManager.registerDeviceService(platformClass, withDiscovery: discoveryProviderClass)
+            }
+        }
+    }
+    
+    func unregisterServices() {
+        ConnectSDKWrapper.defaultPlatforms.forEach { platformClassName, discoveryProviderClassName in
+            if let platformClass = NSClassFromString(platformClassName) as? NSObject.Type,
+               let discoveryProviderClass = NSClassFromString(discoveryProviderClassName) as? DiscoveryProvider.Type {
+                discoveryManager.unregisterDeviceService(platformClass, withDiscovery: discoveryProviderClass)
+            }
+        }
     }
     
     /**
