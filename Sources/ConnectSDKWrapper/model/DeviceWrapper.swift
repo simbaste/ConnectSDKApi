@@ -277,13 +277,46 @@ public class DeviceWrapper: NSObject, ConnectableDeviceDelegate {
         success: @escaping (_ launchObject: MediaLaunchObject?) -> Void,
         failure: @escaping (_ error: Error?) -> Void
     ) {
-        device.mediaPlayer().playMedia(with: mediaInfo, shouldLoop: shouldLoop, success: success, failure: failure)
         device.mediaPlayer().playMedia(with: mediaInfo, shouldLoop: shouldLoop) { mediaLaunchObject in
             self.launchObject = mediaLaunchObject
             success(mediaLaunchObject)
         } failure: { error in
             failure(error)
         }
+    }
+    
+    public func playingState(
+        success: @escaping (_ state: MediaControlPlayState) -> Void,
+        failure: @escaping (_ error: Error?) -> Void
+    ) {
+        launchObject?.mediaControl.subscribePlayState(success: { state in
+            switch state {
+            case MediaControlPlayStateUnknown:
+                success(MediaControlPlayState.unknown)
+                break
+            case MediaControlPlayStateIdle:
+                success(MediaControlPlayState.idle)
+                break
+            case MediaControlPlayStatePlaying:
+                success(MediaControlPlayState.playing)
+                break
+            case MediaControlPlayStatePaused:
+                success(MediaControlPlayState.paused)
+                break
+            case MediaControlPlayStateBuffering:
+                success(MediaControlPlayState.buffering)
+                break
+            case MediaControlPlayStateFinished:
+                success(MediaControlPlayState.finished)
+                break
+            default:
+                success(MediaControlPlayState.unknown)
+                break
+            }
+            
+        }, failure: { err in
+            failure(err)
+        })
     }
     
     public func play(
