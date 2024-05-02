@@ -16,6 +16,8 @@ public class ConnectSDKWrapperBuilder {
     private var delegate: DiscoveryManagerWrapperDelegate?
     private var discoveryManager: DiscoveryManager = DiscoveryManager.shared()
     
+    public init() {}
+    
     /**
      Sets the platforms for the ConnectSDKWrapper.
      
