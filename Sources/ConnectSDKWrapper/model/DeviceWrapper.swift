@@ -168,8 +168,8 @@ public class DeviceWrapper: NSObject, ConnectableDeviceDelegate {
             launcher.launchBrowser(url, success: { session in
                 if (self.hasCapability(.appClose)) {
                     self.browserSession = session
-                    success(session)
                 }
+                success(session)
             }, failure: { error in
                 failure(error)
             })
