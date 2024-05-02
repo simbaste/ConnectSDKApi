@@ -12,6 +12,7 @@ import ConnectSDK
  A wrapper for a ConnectSDK ConnectableDevice.
  */
 public class DeviceWrapper: NSObject, ConnectableDeviceDelegate {
+    
     /// The underlying ConnectSDK ConnectableDevice.
     private let device: ConnectableDevice!
     
@@ -23,6 +24,9 @@ public class DeviceWrapper: NSObject, ConnectableDeviceDelegate {
     
     /// The delegate for handling device events.
     public var delegate: ConnectableDeviceWrapperDelegate? = nil
+    
+    /// Object to control media player
+    var launchObject: MediaLaunchObject?
     
     /**
      Initializes a new DeviceWrapper with the specified ConnectableDevice.
@@ -77,6 +81,10 @@ public class DeviceWrapper: NSObject, ConnectableDeviceDelegate {
      */
     public func hasCapability(_ capability: LauncherCapability) -> Bool {
         return device.hasCapability(capability.rawValue)
+    }
+    
+    public func hasCapability(_ capability: String) -> Bool {
+        return device.hasCapability(capability)
     }
     
     /**
@@ -246,6 +254,99 @@ public class DeviceWrapper: NSObject, ConnectableDeviceDelegate {
         }
     }
     
+    /**
+    Make the MediaPlayerBuilder to contigure media info to be played
+     In order to start the player, call the MediaPlayerBuilder -> build() method
+     */
+    public func makeMediaBuilder() -> MediaPlayerBuilder {
+        return MediaPlayerBuilder(device: self)
+    }
+    
+    /**
+     Play a media
+     
+     - Parameters:
+       - mediaInfo: The media to play.
+       - shouldLoop: Define is the media should loop.
+       - success: A closure to be called upon success, taking an optional MediaLaunchObject as its parameter.
+       - failure: A closure to be called upon failure, taking an optional Error as its parameter.
+     */
+    func playMedia(
+        with mediaInfo: MediaInfo!,
+        shouldLoop: Bool,
+        success: @escaping (_ launchObject: MediaLaunchObject?) -> Void,
+        failure: @escaping (_ error: Error?) -> Void
+    ) {
+        device.mediaPlayer().playMedia(with: mediaInfo, shouldLoop: shouldLoop, success: success, failure: failure)
+        device.mediaPlayer().playMedia(with: mediaInfo, shouldLoop: shouldLoop) { mediaLaunchObject in
+            self.launchObject = mediaLaunchObject
+            success(mediaLaunchObject)
+        } failure: { error in
+            failure(error)
+        }
+    }
+    
+    public func play(
+        success: @escaping (_ succes: Any?) -> Void,
+        failure: @escaping (_ error: Error?) -> Void
+    ) {
+        launchObject?.mediaControl?.play(success: { res in
+            success(res)
+        }, failure: { err in
+            failure(err)
+        })
+    }
+    
+    public func pause(
+        success: @escaping (_ succes: Any?) -> Void,
+        failure: @escaping (_ error: Error?) -> Void
+    ) {
+        launchObject?.mediaControl?.pause(success: { res in
+            success(res)
+        }, failure: { err in
+            failure(err)
+        })
+    }
+    
+    public func seek(
+        position: TimeInterval,
+        success: @escaping (_ succes: Any?) -> Void,
+        failure: @escaping (_ error: Error?) -> Void
+    ) {
+        launchObject?.mediaControl?.seek(position, success: { res in
+            success(res)
+        }, failure: { err in
+            failure(err)
+        })
+    }
+    
+    public func closeSession(
+        success: @escaping (_ succes: Any?) -> Void,
+        failure: @escaping (_ error: Error?) -> Void
+    ) {
+        launchObject?.session?.close(success: { res in
+            success(res)
+        }, failure: { err in
+            failure(err)
+        })
+    }
+    
+    public func closeMediaPlayer(
+        success: @escaping (_ succes: Any?) -> Void,
+        failure: @escaping (_ error: Error?) -> Void
+    ) {
+        if let launchSession = launchObject?.session {
+            device.mediaPlayer()?.closeMedia(launchSession, success: { res in
+                success(res)
+            }, failure: { err in
+                failure(err)
+            })
+        } else {
+            failure(CustomError(message: "Cannot close \(String(describing: launchObject?.session)) session"))
+        }
+        
+    }
+    
     // MARK: - Delegate
     
     /**
@@ -326,3 +427,4 @@ public class DeviceWrapper: NSObject, ConnectableDeviceDelegate {
         return name?.hash ?? 0
     }
 }
+

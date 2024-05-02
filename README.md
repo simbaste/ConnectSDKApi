@@ -97,6 +97,48 @@ deviceWrapper.closeBrowser(success: { result in
 })
 ```
 
+To play a video media using the `makeMediaBuilder()` function, you first need to create an instance of `DeviceWrapper` and then call the `makeMediaBuilder()` function on that instance. Here's how you can do it:
+
+```swift
+import ConnectSDKWrapper
+
+// Assuming you have a `deviceWrapper` instance of `DeviceWrapper`
+let deviceWrapper = DeviceWrapper()
+
+// Use the `makeMediaBuilder()` function to create a `MediaPlayerBuilder` instance
+let mediaPlayerBuilder = deviceWrapper.makeMediaBuilder()
+
+// Set the media URL
+let mediaURL = URL(string: "http://www.connectsdk.com/files/8913/9657/0225/test_video.mp4")
+
+// Set other media properties if needed
+let iconURL = URL(string: "http://www.connectsdk.com/files/7313/9657/0225/test_video_icon.jpg")
+let title = "Sintel Trailer"
+let description = "Blender Open Movie Project"
+let mimeType = "video/mp4" // audio/* for audio files
+
+mediaPlayerBuilder
+    .setMediaURL(mediaURL)
+    .setIconURL(iconURL)
+    .setTitle(title)
+    .setDescription(description)
+    .setMimeType(mimeType)
+    .build(
+        success: { mediaLaunchObject in
+            // Handle success
+            // The media playback has started successfully
+        },
+        failure: { error in
+            // Handle failure
+            // An error occurred while trying to play the media
+            NSLog("play video failure: \(error!.localizedDescription)")
+        }
+    )
+```
+
+In this example, we first create a `MediaPlayerBuilder` instance using the `makeMediaBuilder()` function of the `deviceWrapper`. Then, we set the necessary properties such as the media URL, icon URL, title, description, and MIME type using the builder's setter methods. Finally, we call the `build()` method to start the media playback, passing in success and failure closures to handle the playback result.
+
+
 ### Device Service Capabilities
 
 Check if a device supports certain capabilities:
