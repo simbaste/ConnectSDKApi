@@ -14,7 +14,6 @@ import ConnectSDK
 public class ConnectSDKWrapperBuilder {
     
     private var delegate: DiscoveryManagerWrapperDelegate?
-    private var discoveryManager: DiscoveryManager = DiscoveryManager.shared()
     
     public init() {}
     
@@ -43,19 +42,6 @@ public class ConnectSDKWrapperBuilder {
     }
     
     /**
-     Sets the DiscoveryManager for the ConnectSDKWrapper.
-     
-     - Parameters:
-       - discoveryManager: The DiscoveryManager instance.
-     
-     - Returns: The builder instance.
-     */
-    public func setDiscoveryManager(_ discoveryManager: DiscoveryManager) -> Self {
-        self.discoveryManager = discoveryManager
-        return self
-    }
-    
-    /**
      Builds and returns an instance of ConnectSDKWrapper with the specified configurations.
      
      - Returns: An instance of ConnectSDKWrapper.
@@ -63,8 +49,7 @@ public class ConnectSDKWrapperBuilder {
     public func build() -> ConnectSDKWrapper {
         let connectSDKWrapper = ConnectSDKWrapper()
         connectSDKWrapper.delegate = delegate
-        discoveryManager.pairingLevel = DeviceServicePairingLevelOn
-        connectSDKWrapper.discoveryManager = discoveryManager
+        connectSDKWrapper.discoveryManager.pairingLevel = DeviceServicePairingLevelOn
         connectSDKWrapper.registerServices()
         return connectSDKWrapper
     }

@@ -43,7 +43,6 @@ builder.setDelegate(self)
 
 // Set custom discovery manager (optional)
 let customDiscoveryManager = CustomDiscoveryManager()
-builder.setDiscoveryManager(customDiscoveryManager)
 
 // Set custom platforms (optional)
 let customPlatforms = [
