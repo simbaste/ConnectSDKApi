@@ -49,16 +49,16 @@ public class DeviceWrapper: NSObject, ConnectableDeviceDelegate {
     
     /// The capabilities of the device.
     public var capabilities: [LauncherCapability] {
-        return device.capabilities
+        return device?.capabilities
             .compactMap { $0 as? String }
-            .compactMap { LauncherCapability(rawValue: $0) }
+            .compactMap { LauncherCapability(rawValue: $0) } ?? []
     }
     
     /// The services provided by the device.
     public var services: [DeviceServiceWrapper] {
-        return device.services
+        return device?.services
             .compactMap { $0 as? DeviceService }
-            .map { DeviceServiceWrapper($0) }
+            .map { DeviceServiceWrapper($0) } ?? []
     }
     
     /// The address of the device.
