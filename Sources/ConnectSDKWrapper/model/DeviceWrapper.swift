@@ -219,7 +219,7 @@ public class DeviceWrapper: NSObject, ConnectableDeviceDelegate {
         success: @escaping (_ launchSession: Any?) -> Void,
         failure: @escaping (_ error: Error?) -> Void
     ) {
-        if (hasCapability(.volumeSet)) {
+        if (hasCapability(.muteSet)) {
             device.volumeControl().setMute(mute) { res in
                 success(res)
             } failure: { err in
@@ -243,7 +243,7 @@ public class DeviceWrapper: NSObject, ConnectableDeviceDelegate {
         success: @escaping (_ launchSession: Any?) -> Void,
         failure: @escaping (_ error: Error?) -> Void
     ) {
-        if (hasCapability(.volumeUpDown)) {
+        if (hasCapability(.volumeSet)) {
             device.volumeControl().setVolume(volume) { res in
                 success(res)
             } failure: { err in
@@ -285,85 +285,148 @@ public class DeviceWrapper: NSObject, ConnectableDeviceDelegate {
         }
     }
     
+    /**
+     Get the device playing state
+     
+     - Parameters:
+      - success: The closure which is called when we got the device playing state
+      - failure: The closure which is called when an error occured while trying to get the device playing state
+     */
     public func playingState(
         success: @escaping (_ state: MediaControlPlayState) -> Void,
         failure: @escaping (_ error: Error?) -> Void
     ) {
-        launchObject?.mediaControl.subscribePlayState(success: { state in
-            switch state {
-            case MediaControlPlayStateUnknown:
-                success(MediaControlPlayState.unknown)
-                break
-            case MediaControlPlayStateIdle:
-                success(MediaControlPlayState.idle)
-                break
-            case MediaControlPlayStatePlaying:
-                success(MediaControlPlayState.playing)
-                break
-            case MediaControlPlayStatePaused:
-                success(MediaControlPlayState.paused)
-                break
-            case MediaControlPlayStateBuffering:
-                success(MediaControlPlayState.buffering)
-                break
-            case MediaControlPlayStateFinished:
-                success(MediaControlPlayState.finished)
-                break
-            default:
-                success(MediaControlPlayState.unknown)
-                break
-            }
-            
-        }, failure: { err in
-            failure(err)
-        })
+        if let mediaControl = launchObject?.mediaControl {
+            mediaControl.subscribePlayState(success: { state in
+                switch state {
+                case MediaControlPlayStateUnknown:
+                    success(MediaControlPlayState.unknown)
+                    break
+                case MediaControlPlayStateIdle:
+                    success(MediaControlPlayState.idle)
+                    break
+                case MediaControlPlayStatePlaying:
+                    success(MediaControlPlayState.playing)
+                    break
+                case MediaControlPlayStatePaused:
+                    success(MediaControlPlayState.paused)
+                    break
+                case MediaControlPlayStateBuffering:
+                    success(MediaControlPlayState.buffering)
+                    break
+                case MediaControlPlayStateFinished:
+                    success(MediaControlPlayState.finished)
+                    break
+                default:
+                    success(MediaControlPlayState.unknown)
+                    break
+                }
+                
+            }, failure: { err in
+                failure(err)
+            })
+        } else {
+            failure(CustomError(message: "Can't get playing state on \(String(describing: launchObject?.mediaControl)) media control"))
+        }
+        
     }
     
+    /**
+     Play the current media
+     
+     - Parameters:
+      - success: The closure which is called when the media is correcly played
+      - failure: The closure which is called when an error occured while trying to play the media
+     */
     public func play(
         success: @escaping (_ succes: Any?) -> Void,
         failure: @escaping (_ error: Error?) -> Void
     ) {
-        launchObject?.mediaControl?.play(success: { res in
-            success(res)
-        }, failure: { err in
-            failure(err)
-        })
+        if let mediaControl = launchObject?.mediaControl {
+            mediaControl.play(success: { res in
+                success(res)
+            }, failure: { err in
+                failure(err)
+            })
+        } else {
+            failure(CustomError(message: "Can't play \(String(describing: launchObject?.mediaControl)) media control"))
+        }
     }
     
+    /**
+     Pause the current media
+     
+     - Parameters:
+      - success: The closure which is called when the media is correcly paused
+      - failure: The closure which is called when an error occured while trying to pause the media
+     */
     public func pause(
         success: @escaping (_ succes: Any?) -> Void,
         failure: @escaping (_ error: Error?) -> Void
     ) {
-        launchObject?.mediaControl?.pause(success: { res in
-            success(res)
-        }, failure: { err in
-            failure(err)
-        })
+        if let mediaControl = launchObject?.mediaControl {
+            mediaControl.pause(success: { res in
+                success(res)
+            }, failure: { err in
+                failure(err)
+            })
+        } else {
+            failure(CustomError(message: "Can't pause \(String(describing: launchObject?.mediaControl)) media control"))
+        }
     }
     
+    /**
+     Seek the current media
+     
+     - Parameters:
+      - success: The closure which is called when the media is correcly seeked
+      - failure: The closure which is called when an error occured while trying to seek the media
+     */
     public func seek(
         position: TimeInterval,
         success: @escaping (_ succes: Any?) -> Void,
         failure: @escaping (_ error: Error?) -> Void
     ) {
-        launchObject?.mediaControl?.seek(position, success: { res in
-            success(res)
-        }, failure: { err in
-            failure(err)
-        })
+        if let mediaControl = launchObject?.mediaControl {
+            mediaControl.seek(position, success: { res in
+                success(res)
+            }, failure: { err in
+                failure(err)
+            })
+        } else {
+            failure(CustomError(message: "Can't seek \(String(describing: launchObject?.mediaControl)) media control"))
+        }
     }
     
+    /**
+     Close the current session
+     
+     - Parameters:
+      - success: The closure which is called when the session is correcly closed
+      - failure: The closure which is called when an error occured while trying to close the session
+     */
     public func closeSession(
         success: @escaping (_ succes: Any?) -> Void,
         failure: @escaping (_ error: Error?) -> Void
     ) {
-        launchObject?.session?.close(success: { res in
-            success(res)
-        }, failure: { err in
-            failure(err)
-        })
+        if let session = launchObject?.session {
+            session.close(success: { res in
+                success(res)
+            }, failure: { err in
+                failure(err)
+            })
+        } else {
+            failure(CustomError(message: "Cannot close \(String(describing: launchObject?.session)) session"))
+        }
     }
     
+    /**
+     Close the current media player
+     
+     - Parameters:
+      - success: The closure which is called when the media player is correcly closed
+      - failure: The closure which is called when an error occured while trying to close the media player
+     */
     public func closeMediaPlayer(
         success: @escaping (_ succes: Any?) -> Void,
         failure: @escaping (_ error: Error?) -> Void

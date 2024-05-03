@@ -9,6 +9,7 @@ import ConnectSDK
  */
 public class ConnectSDKWrapper: NSObject, DiscoveryManagerDelegate {
     
+    /// The default platforms supported by ConnectSDK
     static var defaultPlatforms: [String: String] = [
         "AirPlayService": "ZeroConfDiscoveryProvider",
         "DIALService": "SSDPDiscoveryProvider",
