@@ -1,5 +1,5 @@
 //
-//  File.swift
+//  DiscoveryManagerWrapperDelegate.swift
 //  
 //
 //  Created by Stephane SIMO MBA on 24/04/2024.

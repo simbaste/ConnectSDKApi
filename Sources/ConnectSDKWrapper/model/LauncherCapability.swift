@@ -1,5 +1,5 @@
 //
-//  File.swift
+//  LauncherCapability.swift
 //  
 //
 //  Created by Stephane SIMO MBA on 29/04/2024.

@@ -1,5 +1,13 @@
+//
+//  ConnectSDKWrapper.swift
+//
+//
+//  Created by Stephane SIMO MBA on 25/04/2024.
+//
 // The Swift Programming Language
 // https://docs.swift.org/swift-book
+//
+//
 
 import Foundation
 import ConnectSDK
