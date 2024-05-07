@@ -17,17 +17,7 @@ import ConnectSDK
  */
 public class ConnectSDKWrapper: NSObject, DiscoveryManagerDelegate {
     
-    /// The default platforms supported by ConnectSDK
-    static var defaultPlatforms: [String: String] = [
-        "AirPlayService": "ZeroConfDiscoveryProvider",
-        "DIALService": "SSDPDiscoveryProvider",
-        "DLNAService": "SSDPDiscoveryProvider",
-        "NetcastTVService": "SSDPDiscoveryProvider",
-        "RokuService": "SSDPDiscoveryProvider",
-        "WebOSTVService": "SSDPDiscoveryProvider",
-        "CastService": "CastDiscoveryProvider",
-        "FireTVService": "FireTVDiscoveryProvider"
-    ]
+    static var platforms = [String:String]()
     
     /// The delegate for handling discovery events.
     public weak var delegate: DiscoveryManagerWrapperDelegate?
@@ -83,7 +73,7 @@ public class ConnectSDKWrapper: NSObject, DiscoveryManagerDelegate {
     }
     
     func registerServices() {
-        ConnectSDKWrapper.defaultPlatforms.forEach { platformClassName, discoveryProviderClassName in
+        ConnectSDKWrapper.platforms.forEach { platformClassName, discoveryProviderClassName in
             if let platformClass = NSClassFromString(platformClassName) as? NSObject.Type,
                let discoveryProviderClass = NSClassFromString(discoveryProviderClassName) as? DiscoveryProvider.Type {
                 discoveryManager.registerDeviceService(platformClass, withDiscovery: discoveryProviderClass)
@@ -92,7 +82,7 @@ public class ConnectSDKWrapper: NSObject, DiscoveryManagerDelegate {
     }
     
     func unregisterServices() {
-        ConnectSDKWrapper.defaultPlatforms.forEach { platformClassName, discoveryProviderClassName in
+        ConnectSDKWrapper.platforms.forEach { platformClassName, discoveryProviderClassName in
             if let platformClass = NSClassFromString(platformClassName) as? NSObject.Type,
                let discoveryProviderClass = NSClassFromString(discoveryProviderClassName) as? DiscoveryProvider.Type {
                 discoveryManager.unregisterDeviceService(platformClass, withDiscovery: discoveryProviderClass)

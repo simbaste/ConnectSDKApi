@@ -13,6 +13,18 @@ import ConnectSDK
  */
 public class ConnectSDKWrapperBuilder {
     
+    /// The default platforms supported by ConnectSDK
+    private let defaultPlatforms: [String: String] = [
+        "AirPlayService": "ZeroConfDiscoveryProvider",
+        "DIALService": "SSDPDiscoveryProvider",
+        "DLNAService": "SSDPDiscoveryProvider",
+        "NetcastTVService": "SSDPDiscoveryProvider",
+        "RokuService": "SSDPDiscoveryProvider",
+        "WebOSTVService": "SSDPDiscoveryProvider",
+        "CastService": "CastDiscoveryProvider",
+        "FireTVService": "FireTVDiscoveryProvider"
+    ]
+    
     private var delegate: DiscoveryManagerWrapperDelegate?
     
     public init() {}
@@ -21,10 +33,18 @@ public class ConnectSDKWrapperBuilder {
      Sets the platforms for the ConnectSDKWrapper.
      
      - Parameters:
-       - platforms: A dictionary containing the platform names and their associated discovery provider names.
+       - platforms: A list containing the platform names. Ex: (AirPlayService, DIALService, DLNAService, NetcastTVService, NetcastTVService, RokuService, WebOSTVService, CastService, FireTVService)
      */
-    public func setConnectSDKPlatforms(platforms: [String: String]) -> Self {
-        ConnectSDKWrapper.defaultPlatforms = platforms
+    public func setConnectSDKPlatforms(platforms: [Platform]) -> Self {
+        if platforms.isEmpty {
+            ConnectSDKWrapper.platforms = defaultPlatforms
+        } else {
+            platforms.forEach { platform in
+                if let provider = defaultPlatforms[platform.rawValue] {
+                    ConnectSDKWrapper.platforms[platform.rawValue] = provider
+                }
+            }
+        }
         return self
     }
     
