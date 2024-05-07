@@ -41,9 +41,6 @@ let builder = ConnectSDKWrapperBuilder()
 // Set the delegate
 builder.setDelegate(self)
 
-// Set custom discovery manager (optional)
-let customDiscoveryManager = CustomDiscoveryManager()
-
 // Set custom platforms (optional)
 let customPlatforms = [
     "WebOSTVService": "SSDPDiscoveryProvider",
