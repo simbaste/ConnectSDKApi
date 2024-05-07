@@ -42,6 +42,10 @@ public class DeviceWrapper: NSObject, ConnectableDeviceDelegate {
         device?.delegate = self
     }
     
+    public var id: String? {
+        return device?.id
+    }
+    
     /// The name of the device.
     public var name: String? {
         return device?.friendlyName ?? fakeDevice?.name
@@ -62,7 +66,7 @@ public class DeviceWrapper: NSObject, ConnectableDeviceDelegate {
     }
     
     /// The address of the device.
-    private var address: String? {
+    public var address: String? {
         return device?.address
     }
     
