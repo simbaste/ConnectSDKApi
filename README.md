@@ -1,3 +1,4 @@
+```markdown
 # ConnectSDKWrapper
 
 ConnectSDKWrapper is a Swift package that provides a wrapper around the LG WebOS ConnectSDK, allowing you to easily integrate LG WebOS devices into your iOS applications.
@@ -6,13 +7,13 @@ ConnectSDKWrapper is a Swift package that provides a wrapper around the LG WebOS
 
 You can install ConnectSDKWrapper via Swift Package Manager. Add the following URL to your Xcode project's Swift Packages tab:
 
-```
+```plaintext
 git@bitbucket.org:netgem/connectsdkwrapper-ios.git
 ```
 
 Or use the HTTPS URL:
 
-```
+```plaintext
 https://bitbucket.org/netgem/connectsdkwrapper-ios.git
 ```
 
@@ -80,22 +81,28 @@ Handle device connection and disconnection events by implementing `ConnectableDe
 Open and close the browser on the connected device:
 
 ```swift
-deviceWrapper.openBrowser(with: "https://www.example.com", success: { launchSession in
-    // Handle success
-}, failure: { error in
-    // Handle failure
-})
+deviceWrapper.openBrowser(with: "https://www.example.com") { result in
+    switch result {
+    case .success(let launchSession):
+        // Handle success
+    case .failure(let error):
+        // Handle failure
+    }
+}
 
-deviceWrapper.closeBrowser(success: { result in
-    // Handle success
-}, failure: { error in
-    // Handle failure
-})
+deviceWrapper.closeBrowser() { result in
+    switch result {
+    case .success(let res):
+        // Handle success
+    case .failure(let error):
+        // Handle failure
+    }
+}
 ```
 
 ### Media Player
 
-To play a video media using the `makeMediaBuilder()` function, you first need to create an instance of `DeviceWrapper` and then call the `makeMediaBuilder()` function on that instance. Here's how you can do it:
+To play a video media, you first need to create an instance of `DeviceWrapper` and then call the `makeMediaBuilder()` function on that instance. Here's how you can do it:
 
 ```swift
 import ConnectSDKWrapper
@@ -121,21 +128,18 @@ mediaPlayerBuilder
     .setTitle(title)
     .setDescription(description)
     .setMimeType(mimeType)
-    .build(
-        success: { mediaLaunchObject in
+    .build { result in
+        switch result {
+        case .success(let mediaLaunchObject):
             // Handle success
             // The media playback has started successfully
-        },
-        failure: { error in
+        case .failure(let error):
             // Handle failure
             // An error occurred while trying to play the media
-            NSLog("play video failure: \(error!.localizedDescription)")
+            NSLog("play video failure: \(error.localizedDescription)")
         }
-    )
+    }
 ```
-
-In this example, we first create a `MediaPlayerBuilder` instance using the `makeMediaBuilder()` function of the `deviceWrapper`. Then, we set the necessary properties such as the media URL, icon URL, title, description, and MIME type using the builder's setter methods. Finally, we call the `build()` method to start the media playback, passing in success and failure closures to handle the playback result.
-
 
 ### Device Service Capabilities
 
