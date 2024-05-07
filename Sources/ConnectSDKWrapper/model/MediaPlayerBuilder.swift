@@ -67,10 +67,8 @@ public class MediaPlayerBuilder {
     }
     
     // Build method to initiate media playback
-    
     public func build(
-        success: @escaping (_ succes: MediaLaunchObject?) -> Void,
-        failure: @escaping (_ error: Error?) -> Void
+        completion: @escaping (Result<MediaLaunchObject?, Error>) -> Void
     ) {
         let mediaInfo = MediaInfo(url: mediaURL, mimeType: mimeType)
         mediaInfo?.title = title
@@ -93,14 +91,8 @@ public class MediaPlayerBuilder {
         }
 
         // Initiate media playback
-        
-        device.playMedia(with: mediaInfo, shouldLoop: loop) { launchObject in
-            success(launchObject)
-            // save the object reference to control media playback
-            // enable your media control UI elements here
-        } failure: { error in
-            NSLog("play video failure: \(error!.localizedDescription)")
-            failure(error)
+        device.playMedia(with: mediaInfo, shouldLoop: loop) { result in
+            completion(result)
         }
     }
 }

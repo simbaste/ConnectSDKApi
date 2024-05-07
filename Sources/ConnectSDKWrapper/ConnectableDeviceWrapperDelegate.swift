@@ -17,7 +17,7 @@ public protocol ConnectableDeviceWrapperDelegate: AnyObject {
      
      - Parameter device: The connected device.
      */
-    func device(didConnected device: DeviceWrapper)
+    func didConnect(device: DeviceWrapper)
     
     /**
      Called when a device is disconnected.
@@ -26,17 +26,17 @@ public protocol ConnectableDeviceWrapperDelegate: AnyObject {
        - device: The disconnected device.
        - error: An optional Error indicating the reason for disconnection.
      */
-    func device(didDisconnected device: DeviceWrapper, withError error: Error)
+    func didDisconnect(device: DeviceWrapper, withError error: Error?)
     
     /**
      Called when pairing is required with a service of a device.
      
      - Parameters:
+       - pairingType: The type of pairing required.
        - device: The device requiring pairing.
        - service: The service requiring pairing.
-       - pairingType: The type of pairing required.
      */
-    func device(_ device: DeviceWrapper, service: DeviceServiceWrapper, pairingRequiredOfType pairingType: Int32)
+    func didRequirePairing(ofType pairingType: Int32, with device: DeviceWrapper, service: DeviceServiceWrapper)
     
     /**
      Called when pairing with a service of a device has failed.
@@ -46,8 +46,8 @@ public protocol ConnectableDeviceWrapperDelegate: AnyObject {
        - service: The service that failed pairing.
        - error: An optional Error indicating the reason for failure.
      */
-    func device(_ device: DeviceWrapper, service: DeviceServiceWrapper, pairingFailedWithError error: Error)
-    
+    func didFailToPair(device: DeviceWrapper, service: DeviceServiceWrapper, withError error: Error)
+
     /**
      Called when pairing with a service of a device has succeeded.
      
@@ -55,5 +55,5 @@ public protocol ConnectableDeviceWrapperDelegate: AnyObject {
        - device: The device that succeeded pairing.
        - service: The service that succeeded pairing.
      */
-    func deviceParingSucced(_device: DeviceWrapper, service: DeviceServiceWrapper)
+    func didPair(device: DeviceWrapper, service: DeviceServiceWrapper)
 }

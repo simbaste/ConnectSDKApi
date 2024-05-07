@@ -172,97 +172,91 @@ public class DeviceWrapper: NSObject, ConnectableDeviceDelegate {
      
      - Parameters:
        - urlString: The URL string to open in the browser.
-       - success: A closure to be called upon successful launch, taking an optional LaunchSession as its parameter.
-       - failure: A closure to be called upon failure, taking an optional Error as its parameter.
+       - completion: A closure to be called upon successful launch, taking a result containing either a LaunchSession or an Error.
      */
     public func openBrowser(
         with urlString: String,
-        success: @escaping (_ launchSession: LaunchSession?) -> Void,
-        failure: @escaping (_ error: Error?) -> Void
+        completion: @escaping (Result<LaunchSession?, Error>) -> Void
     ) {
-        if let url = URL(string: urlString),
-           let launcher = device?.launcher() {
-            
-            launcher.launchBrowser(url, success: { session in
-                if (self.hasCapability(.appClose)) {
-                    self.browserSession = session
-                }
-                success(session)
-            }, failure: { error in
-                failure(error)
-            })
-            
-        } else {
+        guard let url = URL(string: urlString), let launcher = device?.launcher() else {
             let error = NSError(domain: "com.netgem", code: 1001, userInfo: [NSLocalizedDescriptionKey: "Invalid URL string: \(urlString)"])
-            failure(error)
+            completion(.failure(error))
+            return
         }
+        
+        launcher.launchBrowser(url, success: { session in
+            if self.hasCapability(.appClose) {
+                self.browserSession = session
+            }
+            completion(.success(session))
+        }, failure: { error in
+            completion(.failure(error ?? CustomError(message: "Can't open browser")))
+        })
     }
-    
+
     /**
      Closes the browser session.
      
-     - Parameters:
-       - success: A closure to be called upon successful closure, taking an optional Any as its parameter.
-       - failure: A closure to be called upon failure, taking an optional Error as its parameter.
+     - Parameter completion: A closure to be called upon successful closure, taking a result containing either Any or an Error.
      */
     public func closeBrowser(
-        success: @escaping (_ res: Any?) -> Void,
-        failure: @escaping (_ error: Error?) -> Void
+        completion: @escaping (Result<Any?, Error>) -> Void
     ) {
         self.browserSession?.close(success: { res in
-            success(res)
+            completion(.success(res))
         }, failure: { err in
-            failure(err)
+            completion(.failure(err ?? CustomError(message: "Can't clode browser")))
         })
     }
-    
+
     /**
      Sets the mute state of the device.
      
      - Parameters:
        - mute: The desired mute state (`true` for mute, `false` for unmute).
-       - success: A closure to be called upon success, taking an optional Any as its parameter.
-       - failure: A closure to be called upon failure, taking an optional Error as its parameter.
+       - completion: A closure to be called upon success, taking a result containing either Any or an Error.
      */
     public func setMute(
         mute: Bool,
-        success: @escaping (_ launchSession: Any?) -> Void,
-        failure: @escaping (_ error: Error?) -> Void
+        completion: @escaping (Result<Any?, Error>) -> Void
     ) {
-        if (hasCapability(.muteSet)) {
-            device.volumeControl().setMute(mute) { res in
-                success(res)
-            } failure: { err in
-                failure(err)
-            }
-        } else {
-            failure(CustomError(message: "Device doesn't have volume set control capability"))
+        guard hasCapability(.muteSet) else {
+            let error = CustomError(message: "Device doesn't have volume set control capability")
+            completion(.failure(error))
+            return
+        }
+        
+        device.volumeControl().setMute(mute) { res in
+            completion(.success(res))
+        } failure: { err in
+            completion(.failure(err ?? CustomError(message: "Can't mute device")))
         }
     }
-    
+
     /**
      Sets the volume level of the device.
      
      - Parameters:
        - volume: The desired volume level.
-       - success: A closure to be called upon success, taking an optional Any as its parameter.
-       - failure: A closure to be called upon failure, taking an optional Error as its parameter.
+       - completion: A closure to be called upon success, taking a result containing either Any or an Error.
      */
     public func setVolume(
         volume: Float,
-        success: @escaping (_ launchSession: Any?) -> Void,
-        failure: @escaping (_ error: Error?) -> Void
+        completion: @escaping (Result<Any?, Error>) -> Void
     ) {
-        if (hasCapability(.volumeSet)) {
-            device.volumeControl().setVolume(volume) { res in
-                success(res)
-            } failure: { err in
-                failure(err)
-            }
-        } else {
-            failure(CustomError(message: "Device doesn't have volume upDown control capability"))
+        guard hasCapability(.volumeSet) else {
+            let error = CustomError(message: "Device doesn't have volume upDown control capability")
+            completion(.failure(error))
+            return
+        }
+        
+        device.volumeControl().setVolume(volume) { res in
+            completion(.success(res))
+        } failure: { err in
+            completion(.failure(err ?? CustomError(message: "Can't set the volume")))
         }
     }
+
     
     /**
     Make the MediaPlayerBuilder to contigure media info to be played
@@ -274,137 +268,127 @@ public class DeviceWrapper: NSObject, ConnectableDeviceDelegate {
     
     /**
      Play a media
-     
+
      - Parameters:
        - mediaInfo: The media to play.
-       - shouldLoop: Define is the media should loop.
-       - success: A closure to be called upon success, taking an optional MediaLaunchObject as its parameter.
-       - failure: A closure to be called upon failure, taking an optional Error as its parameter.
+       - shouldLoop: Define if the media should loop.
+       - completion: A closure to be called upon success, taking a result containing either a MediaLaunchObject or an Error.
      */
     func playMedia(
-        with mediaInfo: MediaInfo!,
+        with mediaInfo: MediaInfo?,
         shouldLoop: Bool,
-        success: @escaping (_ launchObject: MediaLaunchObject?) -> Void,
-        failure: @escaping (_ error: Error?) -> Void
+        completion: @escaping (Result<MediaLaunchObject?, Error>) -> Void
     ) {
-        device?.mediaPlayer()?.playMedia(with: mediaInfo, shouldLoop: shouldLoop) { mediaLaunchObject in
+        guard let mediaPlayer = device?.mediaPlayer() else {
+            let error = CustomError(message: "Media player not available")
+            completion(.failure(error))
+            return
+        }
+        
+        mediaPlayer.playMedia(with: mediaInfo, shouldLoop: shouldLoop) { mediaLaunchObject in
             self.launchObject = mediaLaunchObject
-            success(mediaLaunchObject)
+            completion(.success(mediaLaunchObject))
         } failure: { error in
-            failure(error)
+            completion(.failure(error ?? CustomError(message: "Can't play media")))
         }
     }
+
     
     /**
      Get the device playing state
-     
+
      - Parameters:
-      - success: The closure which is called when we got the device playing state
-      - failure: The closure which is called when an error occured while trying to get the device playing state
+      - completion: The closure which is called when we get the device playing state or when an error occurs.
      */
-    public func playingState(
-        success: @escaping (_ state: MediaControlPlayState) -> Void,
-        failure: @escaping (_ error: Error?) -> Void
-    ) {
+    public func playingState(completion: @escaping (Result<MediaControlPlayState, Error>) -> Void) {
         if let mediaControl = launchObject?.mediaControl {
             mediaControl.subscribePlayState(success: { state in
                 switch state {
                 case MediaControlPlayStateUnknown:
-                    success(MediaControlPlayState.unknown)
-                    break
+                    completion(.success(.unknown))
                 case MediaControlPlayStateIdle:
-                    success(MediaControlPlayState.idle)
-                    break
+                    completion(.success(.idle))
                 case MediaControlPlayStatePlaying:
-                    success(MediaControlPlayState.playing)
-                    break
+                    completion(.success(.playing))
                 case MediaControlPlayStatePaused:
-                    success(MediaControlPlayState.paused)
-                    break
+                    completion(.success(.paused))
                 case MediaControlPlayStateBuffering:
-                    success(MediaControlPlayState.buffering)
-                    break
+                    completion(.success(.buffering))
                 case MediaControlPlayStateFinished:
-                    success(MediaControlPlayState.finished)
-                    break
+                    completion(.success(.finished))
                 default:
-                    success(MediaControlPlayState.unknown)
+                    completion(.success(.unknown))
                     break
                 }
-                
-            }, failure: { err in
-                failure(err)
+            }, failure: { error in
+                completion(.failure(error ?? CustomError(message: "Can't get playing state on media control")))
             })
         } else {
-            failure(CustomError(message: "Can't get playing state on \(String(describing: launchObject?.mediaControl)) media control"))
+            let error = CustomError(message: "Can't get playing state on \(String(describing: launchObject?.mediaControl)) media control")
+            completion(.failure(error))
         }
-        
     }
+
     
     /**
      Play the current media
-     
+
      - Parameters:
-      - success: The closure which is called when the media is correcly played
-      - failure: The closure which is called when an error occured while trying to play the media
+      - completion: The closure which is called when the media is correctly played or when an error occurs.
      */
-    public func play(
-        success: @escaping (_ succes: Any?) -> Void,
-        failure: @escaping (_ error: Error?) -> Void
-    ) {
+    public func play(completion: @escaping (Result<Any?, Error>) -> Void) {
         if let mediaControl = launchObject?.mediaControl {
-            mediaControl.play(success: { res in
-                success(res)
-            }, failure: { err in
-                failure(err)
+            mediaControl.play(success: { result in
+                completion(.success(result))
+            }, failure: { error in
+                completion(.failure(error ?? CustomError(message: "Can't play media control")))
             })
         } else {
-            failure(CustomError(message: "Can't play \(String(describing: launchObject?.mediaControl)) media control"))
+            let error = CustomError(message: "Can't play \(String(describing: launchObject?.mediaControl)) media control")
+            completion(.failure(error))
         }
     }
+
     
     /**
      Pause the current media
-     
+
      - Parameters:
-      - success: The closure which is called when the media is correcly paused
-      - failure: The closure which is called when an error occured while trying to pause the media
+      - completion: The closure which is called when the media is correctly paused or when an error occurs.
      */
-    public func pause(
-        success: @escaping (_ succes: Any?) -> Void,
-        failure: @escaping (_ error: Error?) -> Void
-    ) {
+    public func pause(completion: @escaping (Result<Any?, Error>) -> Void) {
         if let mediaControl = launchObject?.mediaControl {
             mediaControl.pause(success: { res in
-                success(res)
-            }, failure: { err in
-                failure(err)
+                completion(.success(res))
+            }, failure: { error in
+                completion(.failure(error ?? CustomError(message: "Can't pause media control")))
             })
         } else {
-            failure(CustomError(message: "Can't pause \(String(describing: launchObject?.mediaControl)) media control"))
+            let error = CustomError(message: "Can't pause \(String(describing: launchObject?.mediaControl)) media control")
+            completion(.failure(error))
         }
     }
+
     
     /**
      Seek the current media
      
      - Parameters:
-      - success: The closure which is called when the media is correcly seeked
-      - failure: The closure which is called when an error occured while trying to seek the media
+      - completion: The closure which is called when the media is correcly seeked
      */
     public func seek(
         position: TimeInterval,
-        success: @escaping (_ succes: Any?) -> Void,
-        failure: @escaping (_ error: Error?) -> Void
+        completion: @escaping (Result<Any?, Error>) -> Void
     ) {
         if let mediaControl = launchObject?.mediaControl {
             mediaControl.seek(position, success: { res in
-                success(res)
+                completion(.success(res))
             }, failure: { err in
-                failure(err)
+                completion(.failure(err ?? CustomError(message: "Can't seek media control")))
             })
         } else {
-            failure(CustomError(message: "Can't seek \(String(describing: launchObject?.mediaControl)) media control"))
+            let error = CustomError(message: "Can't seek \(String(describing: launchObject?.mediaControl)) media control")
+            completion(.failure(error))
         }
     }
     
@@ -412,46 +396,41 @@ public class DeviceWrapper: NSObject, ConnectableDeviceDelegate {
      Close the current session
      
      - Parameters:
-      - success: The closure which is called when the session is correcly closed
-      - failure: The closure which is called when an error occured while trying to close the session
+      - completion: The closure which is called when the session is correctly closed or when an error occurs.
      */
-    public func closeSession(
-        success: @escaping (_ succes: Any?) -> Void,
-        failure: @escaping (_ error: Error?) -> Void
-    ) {
+    public func closeSession(completion: @escaping (Result<Any?, Error>) -> Void) {
         if let session = launchObject?.session {
             session.close(success: { res in
-                success(res)
-            }, failure: { err in
-                failure(err)
+                completion(.success(res))
+            }, failure: { error in
+                completion(.failure(error ?? CustomError(message: "Cannot close session")))
             })
         } else {
-            failure(CustomError(message: "Cannot close \(String(describing: launchObject?.session)) session"))
+            let error = CustomError(message: "Cannot close \(String(describing: launchObject?.session)) session")
+            completion(.failure(error))
         }
     }
+
     
     /**
      Close the current media player
-     
+
      - Parameters:
-      - success: The closure which is called when the media player is correcly closed
-      - failure: The closure which is called when an error occured while trying to close the media player
+      - completion: The closure which is called when the media player is correctly closed or when an error occurs.
      */
-    public func closeMediaPlayer(
-        success: @escaping (_ succes: Any?) -> Void,
-        failure: @escaping (_ error: Error?) -> Void
-    ) {
+    public func closeMediaPlayer(completion: @escaping (Result<Any?, Error>) -> Void) {
         if let launchSession = launchObject?.session {
             device.mediaPlayer()?.closeMedia(launchSession, success: { res in
-                success(res)
-            }, failure: { err in
-                failure(err)
+                completion(.success(res))
+            }, failure: { error in
+                completion(.failure(error ?? CustomError(message: "Cannot close session")))
             })
         } else {
-            failure(CustomError(message: "Cannot close \(String(describing: launchObject?.session)) session"))
+            let error = CustomError(message: "Cannot close \(String(describing: launchObject?.session)) session")
+            completion(.failure(error))
         }
-        
     }
+
     
     // MARK: - Delegate
     
@@ -461,7 +440,7 @@ public class DeviceWrapper: NSObject, ConnectableDeviceDelegate {
      - Parameter device: The ConnectableDevice that is ready.
      */
     public func connectableDeviceReady(_ device: ConnectableDevice!) {
-        delegate?.device(didConnected: DeviceWrapper(device))
+        delegate?.didConnect(device: DeviceWrapper(device))
     }
     
     /**
@@ -472,7 +451,7 @@ public class DeviceWrapper: NSObject, ConnectableDeviceDelegate {
        - error: An optional Error indicating the reason for disconnection.
      */
     public func connectableDeviceDisconnected(_ device: ConnectableDevice!, withError error: (any Error)!) {
-        delegate?.device(didDisconnected: DeviceWrapper(device), withError: error)
+        delegate?.didDisconnect(device: DeviceWrapper(device), withError: error)
     }
     
     /**
@@ -485,7 +464,7 @@ public class DeviceWrapper: NSObject, ConnectableDeviceDelegate {
        - pairingData: The data required for pairing.
      */
     public func connectableDevice(_ device: ConnectableDevice!, service: DeviceService!, pairingRequiredOfType pairingType: Int32, withData pairingData: Any!) {
-        delegate?.device(DeviceWrapper(device), service: DeviceServiceWrapper(service), pairingRequiredOfType: pairingType)
+        delegate?.didRequirePairing(ofType: pairingType, with: DeviceWrapper(device), service: DeviceServiceWrapper(service))
     }
     
     /**
@@ -497,7 +476,7 @@ public class DeviceWrapper: NSObject, ConnectableDeviceDelegate {
        - error: An optional Error indicating the reason for failure.
      */
     public func connectableDevice(_ device: ConnectableDevice!, service: DeviceService!, pairingFailedWithError error: (any Error)!) {
-        delegate?.device(DeviceWrapper(device), service: DeviceServiceWrapper(service), pairingFailedWithError: error)
+        delegate?.didFailToPair(device: DeviceWrapper(device), service: DeviceServiceWrapper(service), withError: error)
     }
     
     /**
@@ -508,7 +487,7 @@ public class DeviceWrapper: NSObject, ConnectableDeviceDelegate {
        - service: The DeviceService that succeeded pairing.
      */
     public func connectableDevicePairingSuccess(_ device: ConnectableDevice!, service: DeviceService!) {
-        delegate?.deviceParingSucced(_device: DeviceWrapper(device), service: DeviceServiceWrapper(service))
+        delegate?.didPair(device: DeviceWrapper(device), service: DeviceServiceWrapper(service))
     }
     
     // MARK: - Comparaison between two devices
