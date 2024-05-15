@@ -69,8 +69,8 @@ public class ConnectSDKWrapperBuilder {
     public func build() -> ConnectSDKWrapper {
         let connectSDKWrapper = ConnectSDKWrapper()
         connectSDKWrapper.delegate = delegate
-        connectSDKWrapper.discoveryManager.pairingLevel = DeviceServicePairingLevelOn
-        connectSDKWrapper.registerServices()
+//        connectSDKWrapper.discoveryManager.pairingLevel = DeviceServicePairingLevelOn
+//        connectSDKWrapper.registerServices()
         return connectSDKWrapper
     }
 }
