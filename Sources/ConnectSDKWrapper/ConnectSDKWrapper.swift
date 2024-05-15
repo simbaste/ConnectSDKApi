@@ -41,7 +41,7 @@ public class ConnectSDKWrapper: NSObject, DiscoveryManagerDelegate {
     
     public func destry() {
         self.discoveredDevices.removeAll()
-        self.discoveryManager.stopDiscovery()
+//        self.discoveryManager.stopDiscovery()
         unregisterServices()
     }
     
@@ -49,15 +49,15 @@ public class ConnectSDKWrapper: NSObject, DiscoveryManagerDelegate {
      Starts searching for devices.
      */
     public func searchForDevices() {
-        self.discoveredDevices.removeAll()
-        self.discoveryManager.startDiscovery()
+//        self.discoveredDevices.removeAll()
+//        self.discoveryManager.startDiscovery()
     }
     
     /**
      Stops searching for devices.
      */
     public func stopSearchingForDevices() {
-        self.discoveryManager.stopDiscovery()
+//        self.discoveryManager.stopDiscovery()
     }
     
     /**
@@ -68,26 +68,26 @@ public class ConnectSDKWrapper: NSObject, DiscoveryManagerDelegate {
        - device: The discovered ConnectableDevice.
      */
     public func discoveryManager(_ manager: DiscoveryManager!, didFind device: ConnectableDevice!) {
-        discoveredDevices.insert(DeviceWrapper(device))
-        delegate?.didFind(Array(discoveredDevices))
+//        discoveredDevices.insert(DeviceWrapper(device))
+//        delegate?.didFind(Array(discoveredDevices))
     }
     
     func registerServices() {
-        ConnectSDKWrapper.platforms.forEach { platformClassName, discoveryProviderClassName in
-            if let platformClass = NSClassFromString(platformClassName) as? NSObject.Type,
-               let discoveryProviderClass = NSClassFromString(discoveryProviderClassName) as? DiscoveryProvider.Type {
-                discoveryManager.registerDeviceService(platformClass, withDiscovery: discoveryProviderClass)
-            }
-        }
+//        ConnectSDKWrapper.platforms.forEach { platformClassName, discoveryProviderClassName in
+//            if let platformClass = NSClassFromString(platformClassName) as? NSObject.Type,
+//               let discoveryProviderClass = NSClassFromString(discoveryProviderClassName) as? DiscoveryProvider.Type {
+//                discoveryManager.registerDeviceService(platformClass, withDiscovery: discoveryProviderClass)
+//            }
+//        }
     }
     
     func unregisterServices() {
-        ConnectSDKWrapper.platforms.forEach { platformClassName, discoveryProviderClassName in
-            if let platformClass = NSClassFromString(platformClassName) as? NSObject.Type,
-               let discoveryProviderClass = NSClassFromString(discoveryProviderClassName) as? DiscoveryProvider.Type {
-                discoveryManager.unregisterDeviceService(platformClass, withDiscovery: discoveryProviderClass)
-            }
-        }
+//        ConnectSDKWrapper.platforms.forEach { platformClassName, discoveryProviderClassName in
+//            if let platformClass = NSClassFromString(platformClassName) as? NSObject.Type,
+//               let discoveryProviderClass = NSClassFromString(discoveryProviderClassName) as? DiscoveryProvider.Type {
+//                discoveryManager.unregisterDeviceService(platformClass, withDiscovery: discoveryProviderClass)
+//            }
+//        }
     }
     
     /**
@@ -98,8 +98,8 @@ public class ConnectSDKWrapper: NSObject, DiscoveryManagerDelegate {
        - device: The lost ConnectableDevice.
      */
     public func discoveryManager(_ manager: DiscoveryManager!, didLose device: ConnectableDevice!) {
-        discoveredDevices.remove(DeviceWrapper(device))
-        delegate?.didFind(Array(discoveredDevices))
+//        discoveredDevices.remove(DeviceWrapper(device))
+//        delegate?.didFind(Array(discoveredDevices))
     }
     
     /**
@@ -110,7 +110,7 @@ public class ConnectSDKWrapper: NSObject, DiscoveryManagerDelegate {
        - device: The updated ConnectableDevice.
      */
     public func discoveryManager(_ manager: DiscoveryManager!, didUpdate device: ConnectableDevice!) {
-        discoveredDevices.update(with: DeviceWrapper(device))
-        delegate?.didFind(Array(discoveredDevices))
+//        discoveredDevices.update(with: DeviceWrapper(device))
+//        delegate?.didFind(Array(discoveredDevices))
     }
 }
