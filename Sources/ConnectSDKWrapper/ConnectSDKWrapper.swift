@@ -32,7 +32,7 @@ public class ConnectSDKWrapper: NSObject, DiscoveryManagerDelegate {
      Initializes a new ConnectSDKWrapper.
      */
     override init() {
-        discoveryManager = DiscoveryManager.shared()
+        discoveryManager = DiscoveryManager()
 //        super.init()
 //        discoveryManager.delegate = self
 //        AirPlayService.setAirPlayServiceMode(AirPlayServiceModeMedia)
