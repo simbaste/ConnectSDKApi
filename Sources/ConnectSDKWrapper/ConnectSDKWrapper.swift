@@ -23,7 +23,7 @@ public class ConnectSDKWrapper: NSObject, DiscoveryManagerDelegate {
     public weak var delegate: DiscoveryManagerWrapperDelegate?
     
     /// The underlying ConnectSDK DiscoveryManager.
-//    var discoveryManager: DiscoveryManager
+    var discoveryManager: DiscoveryManager
     
     /// The set of discovered devices.
     private var discoveredDevices: Set<DeviceWrapper> = Set()
@@ -32,7 +32,7 @@ public class ConnectSDKWrapper: NSObject, DiscoveryManagerDelegate {
      Initializes a new ConnectSDKWrapper.
      */
     override init() {
-//        discoveryManager = DiscoveryManager.shared()
+        discoveryManager = DiscoveryManager.shared()
 //        super.init()
 //        discoveryManager.delegate = self
 //        AirPlayService.setAirPlayServiceMode(AirPlayServiceModeMedia)
