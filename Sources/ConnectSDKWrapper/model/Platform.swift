@@ -8,7 +8,6 @@
 import Foundation
 
 public enum Platform: String {
-    case airplay = "AirPlayService"
     case dial = "DIALService"
     case dlna = "DLNAService"
     case netcast = "NetcastTVService"

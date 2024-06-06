@@ -4,26 +4,6 @@
 <dict>
 	<key>files</key>
 	<dict>
-		<key>Headers/AirPlayService.h</key>
-		<data>
-		B9yC/sntzJWK0B9gkbM39M39+9g=
-		</data>
-		<key>Headers/AirPlayServiceHTTP.h</key>
-		<data>
-		eopNSpdtRcb4tZtrBTnf8nHdE5o=
-		</data>
-		<key>Headers/AirPlayServiceHTTPKeepAlive.h</key>
-		<data>
-		xEgqolGFiRWjhNrSlNNUNs4bYcs=
-		</data>
-		<key>Headers/AirPlayServiceMirrored.h</key>
-		<data>
-		bXHklN2icYg8pM+HI/5Iui/ls3U=
-		</data>
-		<key>Headers/AirPlayWebAppSession.h</key>
-		<data>
-		sIIlYP6tjWJRqPVYa2BLOmHOyAI=
-		</data>
 		<key>Headers/AppInfo.h</key>
 		<data>
 		Q7KVMyVhadupEt0+BI/GCebhr+0=
@@ -118,7 +98,7 @@
 		</data>
 		<key>Headers/ConnectSDK-umbrella.h</key>
 		<data>
-		7qzZNDGvHa/ni2/mx6gLBaZxn7Y=
+		uPoFnuXDhH7n2OSCWW/YnR5S6P4=
 		</data>
 		<key>Headers/ConnectSDK.h</key>
 		<data>
@@ -126,7 +106,7 @@
 		</data>
 		<key>Headers/ConnectSDKDefaultPlatforms.h</key>
 		<data>
-		3Qbtq4M/vln368ehmOWGf3JzN9g=
+		Y2nz56bK5/rZGHOypZ/ZA1ziEXA=
 		</data>
 		<key>Headers/ConnectUtil.h</key>
 		<data>
@@ -462,19 +442,11 @@
 		</data>
 		<key>Info.plist</key>
 		<data>
-		0FShbZk20dITYl2hIiwR1ApY2GA=
+		O12FtYwNOXq9S5o1w/oCoX7hnek=
 		</data>
 		<key>Modules/module.modulemap</key>
 		<data>
 		uuxT0QxrdbrK9bR+FtFVjtcb/KQ=
-		</data>
-		<key>PrivateHeaders/AirPlayServiceHTTP_Private.h</key>
-		<data>
-		NoIiMl22inxFcwFD6NjoK49g/Hc=
-		</data>
-		<key>PrivateHeaders/AirPlayService_Private.h</key>
-		<data>
-		i+wP+Lp4DffcLUYLx1aG+hmpkYU=
 		</data>
 		<key>PrivateHeaders/DLNAHTTPServer_Private.h</key>
 		<data>
@@ -523,41 +495,6 @@
 	</dict>
 	<key>files2</key>
 	<dict>
-		<key>Headers/AirPlayService.h</key>
-		<dict>
-			<key>hash2</key>
-			<data>
-			3oP6Ln1F/tOyEomtjRwE2lmUx0y9t3hBudm6TxOuCXE=
-			</data>
-		</dict>
-		<key>Headers/AirPlayServiceHTTP.h</key>
-		<dict>
-			<key>hash2</key>
-			<data>
-			eZQS9jj2dPDvibsUSyQsyc6gJ+OM9OMbRgweOEKjSKw=
-			</data>
-		</dict>
-		<key>Headers/AirPlayServiceHTTPKeepAlive.h</key>
-		<dict>
-			<key>hash2</key>
-			<data>
-			BurzdGmJfKIch0F+rDT87J/luIc24xzmsLexR+dyBow=
-			</data>
-		</dict>
-		<key>Headers/AirPlayServiceMirrored.h</key>
-		<dict>
-			<key>hash2</key>
-			<data>
-			VQc1lZ6KISwCoFYIfgkTwJxEOkbAMTNOjTfyHlOabTI=
-			</data>
-		</dict>
-		<key>Headers/AirPlayWebAppSession.h</key>
-		<dict>
-			<key>hash2</key>
-			<data>
-			ERlocvloD0clh8YEMiXTSG2jeKnq91qtTwLibewAVaA=
-			</data>
-		</dict>
 		<key>Headers/AppInfo.h</key>
 		<dict>
 			<key>hash2</key>
@@ -723,7 +660,7 @@
 		<dict>
 			<key>hash2</key>
 			<data>
-			PvDAfkF+B3A4Kae84VOIOF+GpqBe6Z/0/iXXgAlyfJ8=
+			JNm5sfEgP36wr4bPsn98K4CYKFYRN8HO6rBerPUfct0=
 			</data>
 		</dict>
 		<key>Headers/ConnectSDK.h</key>
@@ -737,7 +674,7 @@
 		<dict>
 			<key>hash2</key>
 			<data>
-			b8joExagzoSCzPNbte82j/zZ/YaIJrxJ6DgsRG4bVJg=
+			VuLOXMlAIu1qE+72mmfMQb3zaRa/NH+ylYHsQnHZYqI=
 			</data>
 		</dict>
 		<key>Headers/ConnectUtil.h</key>
@@ -1326,20 +1263,6 @@
 			<key>hash2</key>
 			<data>
 			Ol1NMkKanHtSN3CefcLUESpAXSqpRU+UVWHxwo3JDXE=
-			</data>
-		</dict>
-		<key>PrivateHeaders/AirPlayServiceHTTP_Private.h</key>
-		<dict>
-			<key>hash2</key>
-			<data>
-			OonLtqIsI1F6ZJMa5EXLec1l+P+KYacsS5soqJDl6pk=
-			</data>
-		</dict>
-		<key>PrivateHeaders/AirPlayService_Private.h</key>
-		<dict>
-			<key>hash2</key>
-			<data>
-			tq1cF64dKME+YbpE3joDEhgbi5MNobhAIEqlepQqL7E=
 			</data>
 		</dict>
 		<key>PrivateHeaders/DLNAHTTPServer_Private.h</key>

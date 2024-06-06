@@ -15,7 +15,6 @@ public class ConnectSDKWrapperBuilder {
     
     /// The default platforms supported by ConnectSDK
     private let defaultPlatforms: [String: String] = [
-        "AirPlayService": "ZeroConfDiscoveryProvider",
         "DIALService": "SSDPDiscoveryProvider",
         "DLNAService": "SSDPDiscoveryProvider",
         "NetcastTVService": "SSDPDiscoveryProvider",
@@ -33,7 +32,7 @@ public class ConnectSDKWrapperBuilder {
      Sets the platforms for the ConnectSDKWrapper.
      
      - Parameters:
-       - platforms: A list containing the platform names. Ex: (AirPlayService, DIALService, DLNAService, NetcastTVService, NetcastTVService, RokuService, WebOSTVService, CastService, FireTVService)
+       - platforms: A list containing the platform names. Ex: (DIALService, DLNAService, NetcastTVService, NetcastTVService, RokuService, WebOSTVService, CastService, FireTVService)
      */
     public func setConnectSDKPlatforms(platforms: [Platform]) -> Self {
         if platforms.isEmpty {

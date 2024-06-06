@@ -35,7 +35,6 @@ public class ConnectSDKWrapper: NSObject, DiscoveryManagerDelegate {
         discoveryManager = DiscoveryManager()
         super.init()
         discoveryManager.delegate = self
-        AirPlayService.setAirPlayServiceMode(AirPlayServiceModeMedia)
         DIALService.registerApp("Levak")
     }
     

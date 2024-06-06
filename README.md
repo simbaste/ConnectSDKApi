@@ -43,10 +43,10 @@ let builder = ConnectSDKWrapperBuilder()
 builder.setDelegate(self)
 
 // Set custom platforms (optional)
-let customPlatforms = [.cast, .webos, .airplay]
+let customPlatforms = [.cast, .webos, .dlna]
 builder.setConnectSDKPlatforms(platforms: customPlatforms)
 
-// Available platforms [.airplay, .dial, .dlna, .netcast, .ruku, .webos, .cast, .firetv]
+// Available platforms [.dial, .dlna, .netcast, .ruku, .webos, .cast, .firetv]
 
 // Build the ConnectSDKWrapper instance
 let connectSDKWrapper = builder.build()
