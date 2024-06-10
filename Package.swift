@@ -24,14 +24,7 @@ let package = Package(
             name: "ConnectSDK",
             path: "Libraries/ConnectSDK.xcframework"
         ),
-//        .binaryTarget(
-//            name: "LGCast",
-//            path: "Libraries/LGCast.xcframework"
-//        ),
-//        .binaryTarget(
-//            name: "GStreamerForLGCast",
-//            path: "Libraries/GStreamerForLGCast.xcframework"
-//        ),
+
         .testTarget(
             name: "ConnectSDKWrapperTests",
             dependencies: ["ConnectSDKWrapper", "ConnectSDK"]),
