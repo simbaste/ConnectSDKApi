@@ -12,7 +12,7 @@ let package = Package(
         // Products define the executables and libraries a package produces, making them visible to other packages.
         .library(
             name: "ConnectSDKWrapper",
-            targets: ["ConnectSDKWrapper", "ConnectSDK", "LGCast", "GStreamerForLGCast"]),
+            targets: ["ConnectSDKWrapper", "ConnectSDK"]),
     ],
     targets: [
         // Targets are the basic building blocks of a package, defining a module or a test suite.
@@ -24,16 +24,16 @@ let package = Package(
             name: "ConnectSDK",
             path: "Libraries/ConnectSDK.xcframework"
         ),
-        .binaryTarget(
-            name: "LGCast",
-            path: "Libraries/LGCast.xcframework"
-        ),
-        .binaryTarget(
-            name: "GStreamerForLGCast",
-            path: "Libraries/GStreamerForLGCast.xcframework"
-        ),
+//        .binaryTarget(
+//            name: "LGCast",
+//            path: "Libraries/LGCast.xcframework"
+//        ),
+//        .binaryTarget(
+//            name: "GStreamerForLGCast",
+//            path: "Libraries/GStreamerForLGCast.xcframework"
+//        ),
         .testTarget(
             name: "ConnectSDKWrapperTests",
-            dependencies: ["ConnectSDKWrapper", "ConnectSDK", "LGCast", "GStreamerForLGCast"]),
+            dependencies: ["ConnectSDKWrapper", "ConnectSDK"]),
     ]
 )
