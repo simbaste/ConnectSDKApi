@@ -20,8 +20,6 @@ public class ConnectSDKWrapperBuilder {
         "NetcastTVService": "SSDPDiscoveryProvider",
         "RokuService": "SSDPDiscoveryProvider",
         "WebOSTVService": "SSDPDiscoveryProvider",
-        "CastService": "CastDiscoveryProvider",
-        "FireTVService": "FireTVDiscoveryProvider"
     ]
     
     private var delegate: DiscoveryManagerWrapperDelegate?
