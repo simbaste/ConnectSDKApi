@@ -102,10 +102,6 @@ extension YourViewController: ConnectableDeviceWrapperDelegate {
 }
 ```
 
-Connect to a discovered device:
-
-
-
 Handle device connection and disconnection events by implementing `ConnectableDeviceWrapperDelegate`.
 
 ### Browser Control
