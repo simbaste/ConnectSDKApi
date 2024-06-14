@@ -72,7 +72,6 @@ Assuming you have an instance of DeviceWrapper object
 
 ```swift
 extension YourViewController: ConnectableDeviceWrapperDelegate {
-
     deviceWrapper.delegate = self
     
     init() {
