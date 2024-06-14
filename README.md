@@ -68,11 +68,43 @@ extension YourViewController: DiscoveryManagerWrapperDelegate {
 
 ### Connection
 
-Connect to a discovered device:
+Assuming you have an instance of DeviceWrapper object
 
 ```swift
-deviceWrapper.connect()
+extension YourViewController: ConnectableDeviceWrapperDelegate {
+
+    deviceWrapper.delegate = self
+    
+    init() {
+        // Connect to a discovered device:
+        deviceWrapper.connect()
+    }
+    
+    func didConnect(device: DeviceWrapper) {
+        // Handle device connection
+    }
+    
+    func didDisconnect(device: DeviceWrapper, withError error: Error?) {
+        // Handle device disconnection
+    }
+    
+    func didRequirePairing(ofType pairingType: Int32, with device: DeviceWrapper, service: DeviceServiceWrapper) {
+        // Handle device pairing request
+    }
+    
+    func didFailToPair(device: DeviceWrapper, service: DeviceServiceWrapper, withError error: Error) {
+        // Handle device pairing request faillure
+    }
+
+    func didPair(device: DeviceWrapper, service: DeviceServiceWrapper) {
+        // Handle device pairing successfully
+    }
+}
 ```
+
+Connect to a discovered device:
+
+
 
 Handle device connection and disconnection events by implementing `ConnectableDeviceWrapperDelegate`.
 

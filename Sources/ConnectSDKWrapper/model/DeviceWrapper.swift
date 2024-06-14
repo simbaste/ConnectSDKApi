@@ -14,7 +14,7 @@ import ConnectSDK
 public class DeviceWrapper: NSObject, ConnectableDeviceDelegate {
     
     /// The underlying ConnectSDK ConnectableDevice.
-    private let device: ConnectableDevice!
+    private var device: ConnectableDevice!
     
     /// The browser session associated with the device.
     private var browserSession: LaunchSession? = nil
@@ -440,7 +440,8 @@ public class DeviceWrapper: NSObject, ConnectableDeviceDelegate {
      - Parameter device: The ConnectableDevice that is ready.
      */
     public func connectableDeviceReady(_ device: ConnectableDevice!) {
-        delegate?.didConnect(device: DeviceWrapper(device))
+        self.device = device
+        delegate?.didConnect(device: self)
     }
     
     /**
@@ -451,7 +452,8 @@ public class DeviceWrapper: NSObject, ConnectableDeviceDelegate {
        - error: An optional Error indicating the reason for disconnection.
      */
     public func connectableDeviceDisconnected(_ device: ConnectableDevice!, withError error: (any Error)!) {
-        delegate?.didDisconnect(device: DeviceWrapper(device), withError: error)
+        self.device = device
+        delegate?.didDisconnect(device: self, withError: error)
     }
     
     /**
@@ -464,7 +466,8 @@ public class DeviceWrapper: NSObject, ConnectableDeviceDelegate {
        - pairingData: The data required for pairing.
      */
     public func connectableDevice(_ device: ConnectableDevice!, service: DeviceService!, pairingRequiredOfType pairingType: Int32, withData pairingData: Any!) {
-        delegate?.didRequirePairing(ofType: pairingType, with: DeviceWrapper(device), service: DeviceServiceWrapper(service))
+        self.device = device
+        delegate?.didRequirePairing(ofType: pairingType, with: self, service: DeviceServiceWrapper(service))
     }
     
     /**
@@ -476,7 +479,8 @@ public class DeviceWrapper: NSObject, ConnectableDeviceDelegate {
        - error: An optional Error indicating the reason for failure.
      */
     public func connectableDevice(_ device: ConnectableDevice!, service: DeviceService!, pairingFailedWithError error: (any Error)!) {
-        delegate?.didFailToPair(device: DeviceWrapper(device), service: DeviceServiceWrapper(service), withError: error)
+        self.device = device
+        delegate?.didFailToPair(device: self, service: DeviceServiceWrapper(service), withError: error)
     }
     
     /**
@@ -487,7 +491,8 @@ public class DeviceWrapper: NSObject, ConnectableDeviceDelegate {
        - service: The DeviceService that succeeded pairing.
      */
     public func connectableDevicePairingSuccess(_ device: ConnectableDevice!, service: DeviceService!) {
-        delegate?.didPair(device: DeviceWrapper(device), service: DeviceServiceWrapper(service))
+        self.device = device
+        delegate?.didPair(device: self, service: DeviceServiceWrapper(service))
     }
     
     // MARK: - Comparaison between two devices
