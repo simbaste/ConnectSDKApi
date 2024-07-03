@@ -200,7 +200,7 @@ public class DeviceWrapper: NSObject, ConnectableDeviceDelegate {
     
     private func connectToSmartView(_ appId: NSURL, _ channelID: String) throws {
         print("connectToSmartView with appId ==> \(String(describing: appId))")
-        if smartViewApplication.uri != appId.absoluteString {
+        if smartViewApplication?.uri != appId.absoluteString {
             smartViewApplication = smartViewService.createApplication(appId, channelURI: channelID, args: nil)
         }
         guard let application = smartViewApplication else {
