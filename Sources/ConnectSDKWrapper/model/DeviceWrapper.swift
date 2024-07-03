@@ -244,7 +244,7 @@ public class DeviceWrapper: NSObject, ConnectableDeviceDelegate {
                 self.delegate?.didFailToPair(
                     device: self,
                     service: DeviceServiceWrapper(self.smartViewService!),
-                    withError: CustomError(message: "Failled to connect to device", code: 500))
+                    withError: error ?? CustomError(message: "Failled to connect to device", code: 500))
             }
         }
     }
