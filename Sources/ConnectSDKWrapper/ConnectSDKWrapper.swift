@@ -11,11 +11,12 @@
 
 import Foundation
 import ConnectSDK
+import SmartView
 
 /**
  A wrapper for the ConnectSDK DiscoveryManager.
  */
-public class ConnectSDKWrapper: NSObject, DiscoveryManagerDelegate {
+public class ConnectSDKWrapper: NSObject, DiscoveryManagerDelegate, ServiceSearchDelegate {
     
     static var platforms = [String:String]()
     
@@ -28,6 +29,9 @@ public class ConnectSDKWrapper: NSObject, DiscoveryManagerDelegate {
     /// The set of discovered devices.
     private var discoveredDevices: Set<DeviceWrapper> = Set()
     
+    /// SmartView Service Search
+    var serviceSearch: ServiceSearch!
+    
     /**
      Initializes a new ConnectSDKWrapper.
      */
@@ -36,11 +40,16 @@ public class ConnectSDKWrapper: NSObject, DiscoveryManagerDelegate {
         super.init()
         discoveryManager.delegate = self
         DIALService.registerApp("Levak")
+        
+        // Initialize and start SmartView service search
+        serviceSearch = Service.search()
+        serviceSearch.delegate = self
     }
     
     public func destry() {
         self.discoveredDevices.removeAll()
         self.discoveryManager.stopDiscovery()
+        serviceSearch.stop() // Stop SmartView service search
         unregisterServices()
     }
     
@@ -50,6 +59,7 @@ public class ConnectSDKWrapper: NSObject, DiscoveryManagerDelegate {
     public func searchForDevices() {
         self.discoveredDevices.removeAll()
         self.discoveryManager.startDiscovery()
+        serviceSearch.start()
     }
     
     /**
@@ -57,6 +67,7 @@ public class ConnectSDKWrapper: NSObject, DiscoveryManagerDelegate {
      */
     public func stopSearchingForDevices() {
         self.discoveryManager.stopDiscovery()
+        serviceSearch.stop() // Stop SmartView service Search
     }
     
     /**
@@ -69,6 +80,21 @@ public class ConnectSDKWrapper: NSObject, DiscoveryManagerDelegate {
     public func discoveryManager(_ manager: DiscoveryManager!, didFind device: ConnectableDevice!) {
         discoveredDevices.insert(DeviceWrapper(device))
         delegate?.didFind(Array(discoveredDevices))
+    }
+    
+    // MARK: - ServiceSearchDelegate
+    
+    public func onServiceFound(_ service: Service) {
+        let deviceWrapper = DeviceWrapper(service: service)
+        discoveredDevices.insert(deviceWrapper)
+        delegate?.didFind(Array(discoveredDevices))
+    }
+    
+    public func onServiceLost(_ service: Service) {
+        if let deviceWrapper = discoveredDevices.first(where: { $0.smartViewService?.id == service.id }) {
+            discoveredDevices.remove(deviceWrapper)
+            delegate?.didFind(Array(discoveredDevices))
+        }
     }
     
     func registerServices() {

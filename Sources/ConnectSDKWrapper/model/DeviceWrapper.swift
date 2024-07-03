@@ -7,6 +7,7 @@
 
 import Foundation
 import ConnectSDK
+import SmartView
 
 /**
  A wrapper for a ConnectSDK ConnectableDevice.
@@ -15,6 +16,12 @@ public class DeviceWrapper: NSObject, ConnectableDeviceDelegate {
     
     /// The underlying ConnectSDK ConnectableDevice.
     private var device: ConnectableDevice!
+    
+    /// The underlying SmartView Service.
+    var smartViewService: Service!
+    
+    /// The underlying SmartView application
+    private var smartViewApplication: Application!
     
     /// The browser session associated with the device.
     private var browserSession: LaunchSession? = nil
@@ -42,6 +49,17 @@ public class DeviceWrapper: NSObject, ConnectableDeviceDelegate {
         device?.delegate = self
     }
     
+    /**
+     Initializes a new DeviceWrapper with the specified SmartView Service
+     - Parameters:
+        - service: The SmartView Service to wrap
+     */
+    public init(service: Service, _ fakeDevice: FakeDevice? = nil) {
+        self.smartViewService = service
+        self.fakeDevice = fakeDevice
+        super.init()
+    }
+    
     /// The device ID
     public var id: String? {
         return device?.id
@@ -49,12 +67,12 @@ public class DeviceWrapper: NSObject, ConnectableDeviceDelegate {
     
     /// The name of the device.
     public var name: String? {
-        return device?.friendlyName ?? fakeDevice?.name
+        return device?.friendlyName ?? smartViewService?.id ?? fakeDevice?.name
     }
     
     /// The modelName of the device
     public var modelName: String? {
-        return device?.modelName
+        return device?.modelName ?? smartViewService?.name
     }
     
     /// The capabilities of the device.
@@ -158,13 +176,87 @@ public class DeviceWrapper: NSObject, ConnectableDeviceDelegate {
     }
     
     /// Connects to the device.
-    public func connect() {
+    public func connect(appId: NSURL, channelID: String) throws {
+        if (smartViewService != nil) {
+            try connectToSmartView(appId, channelID)
+        } else if (device != nil) {
+            device?.connect()
+        } else {
+            throw CustomError(message: "Not define", code: 500)
+        }
+    }
+    
+    public func connect() throws {
+        if (device != nil) {
+            device?.connect()
+        } else {
+            throw CustomError(message: "Not define", code: 500)
+        }
+    }
+    
+    private func connectToLG() {
         device?.connect()
+    }
+    
+    private func connectToSmartView(_ appId: NSURL, _ channelID: String) throws {
+        print("connectToSmartView with appId ==> \(String(describing: appId))")
+        if smartViewApplication.uri != appId.absoluteString {
+            smartViewApplication = smartViewService.createApplication(appId, channelURI: channelID, args: nil)
+        }
+        guard let application = smartViewApplication else {
+            throw CustomError(message: "Cannot create SmartView application", code: 404)
+        }
+        
+        
+        application.getInfo({ info, error in
+            if let error = error, error.code == 404 {
+                // Install the application on the TV
+                // Note: Thos will only bring up the installation page on the TV
+                // The user will still have to acknowledge by selecting "install" using the TV remmote.
+                application.install({ success, error in
+                    if let error = error {
+                        self.delegate?.didFailToPair(device: self, service: DeviceServiceWrapper(self.smartViewService!), withError: error)
+                    } else {
+                        self.delegate?.didRequirePairing(ofType: 101, with: self, service: DeviceServiceWrapper(self.smartViewService!))
+                    }
+                })
+            } else {
+                print("application info = \(String(describing: info))")
+            }
+        })
+        
+        print("application isConnected ==> \(String(describing: application.isConnected))")
+        application.connect(nil) { client, error in
+            if let error = error, error.code == 404 {
+                // Install the application on the TV
+                // Note: Thos will only bring up the installation page on the TV
+                // The user will still have to acknowledge by selecting "install" using the TV remmote.
+                application.install({ success, error in
+                    if let error = error {
+                        self.delegate?.didFailToPair(device: self, service: DeviceServiceWrapper(self.smartViewService!), withError: error)
+                    } else {
+                        self.delegate?.didRequirePairing(ofType: 101, with: self, service: DeviceServiceWrapper(self.smartViewService!))
+                    }
+                })
+            } else if let client = client {
+                self.delegate?.didConnect(device: self)
+            } else {
+                self.delegate?.didFailToPair(
+                    device: self,
+                    service: DeviceServiceWrapper(self.smartViewService!),
+                    withError: CustomError(message: "Failled to connect to device", code: 500))
+            }
+        }
     }
     
     /// Disconnects from the device.
     public func disconnect() {
         device?.disconnect()
+        smartViewApplication?.disconnect({ client, error in
+            if let client = client {
+                self.delegate?.didDisconnect(device: self, withError: error)
+            }
+        })
     }
     
     /**
@@ -176,7 +268,7 @@ public class DeviceWrapper: NSObject, ConnectableDeviceDelegate {
      */
     public func openBrowser(
         with urlString: String,
-        completion: @escaping (Result<LaunchSession?, Error>) -> Void
+        completion: @escaping (Result<ApplicationState, Error>) -> Void
     ) {
         guard let url = URL(string: urlString), let launcher = device?.launcher() else {
             let error = NSError(domain: "com.netgem", code: 1001, userInfo: [NSLocalizedDescriptionKey: "Invalid URL string: \(urlString)"])
@@ -188,10 +280,95 @@ public class DeviceWrapper: NSObject, ConnectableDeviceDelegate {
             if self.hasCapability(.appClose) {
                 self.browserSession = session
             }
-            completion(.success(session))
+            completion(.success(.lauched))
         }, failure: { error in
-            completion(.failure(error ?? CustomError(message: "Can't open browser")))
+            completion(.failure(error ?? CustomError(message: "Can't open browser", code: 403)))
         })
+    }
+    
+    /**
+     Launch a smartView application on the device
+     - Parameters:
+        - appId: The ID of the application to launch.
+        - channelIdURI: The channel URL for the application.
+        - args: Otional arguments for teh application.
+        - completion: A closure to be called upon success, taking a result containing either a Bool or an Error.
+     */
+    public func launchSmartViewGame(
+        appId: NSURL,
+        channelID: String,
+        args: [String: String],
+        completion: @escaping (Result<ApplicationState, Error>) -> Void
+    ) {
+        guard let smartViewService = smartViewService else {
+            let error = NSError(domain: "com.netgem", code: 1001, userInfo: [NSLocalizedDescriptionKey: "SmartView service not available"])
+            completion(.failure(error))
+            return
+        }
+        
+        var startArgs: [String: AnyObject] = [:]
+        for (key, value) in args {
+            startArgs[key] = value as AnyObject
+        }
+
+        guard let application = smartViewApplication else {
+            completion(.failure(CustomError(message: "Cannot create SmartView application", code: 505)))
+            return
+        }
+        
+        
+        application.getInfo({ info, error in
+            if let error = error, error.code == 404 {
+                // Install the application on the TV
+                // Note: Thos will only bring up the installation page on the TV
+                // The user will still have to acknowledge by selecting "install" using the TV remmote.
+                application.install({ success, error in
+                    if let error = error {
+                        completion(.failure(error))
+                    } else {
+                        completion(.success(.installing))
+                    }
+                })
+            } else {
+                print("application info = \(String(describing: info))")
+            }
+        })
+        
+        print("application isConnected ==> \(String(describing: application.isConnected))")
+        if application.isConnected {
+            do {
+                let jsonData = try JSONSerialization.data(withJSONObject: args)
+                if let jsonString = String(data: jsonData, encoding: .utf8) {
+                    let anyObject: AnyObject = jsonString as AnyObject
+                    application.publish(event: "play", message: anyObject)
+                    completion(.success(.communicate))
+                } else {
+                    completion(.failure(CustomError(message: "Failled to format arguments", code: 422)))
+                }
+            } catch {
+                completion(.failure(CustomError(message: "Failled to send message to TV", code: 502)))
+            }
+        } else {
+            application.connect(args, completionHandler: { client, error in
+                if let error = error, error.code == 404 {
+                    // Install the application on the TV
+                    // Note: Thos will only bring up the installation page on the TV
+                    // The user will still have to acknowledge by selecting "install" using the TV remmote.
+                    application.install({ success, error in
+                        if let error = error {
+                            completion(.failure(error))
+                        } else {
+                            completion(.success(.installing))
+                        }
+                    })
+                } else if let client = client {
+                    completion(.success(.lauched))
+                } else {
+                    completion(.failure(CustomError(message: "Failled to launch game on TV", code: 502)))
+                }
+            })
+        }
+        
     }
 
     /**
@@ -205,7 +382,29 @@ public class DeviceWrapper: NSObject, ConnectableDeviceDelegate {
         self.browserSession?.close(success: { res in
             completion(.success(res))
         }, failure: { err in
-            completion(.failure(err ?? CustomError(message: "Can't clode browser")))
+            completion(.failure(err ?? CustomError(message: "Can't clode browser", code: 500)))
+        })
+    }
+    
+    /**
+     Closes the game companion app.
+     
+     - Parameter completion: A closure to be called upon successful closure, taking a result containing either Any or an Error.
+     */
+    public func closeGame(
+        completion: @escaping (Result<Any?, Error>) -> Void
+    ) {
+        self.browserSession?.close(success: { res in
+            completion(.success(res))
+        }, failure: { err in
+            completion(.failure(err ?? CustomError(message: "Can't clode browser", code: 500)))
+        })
+        self.smartViewApplication?.stop({ success, error in
+            if let error = error {
+                completion(.failure(error))
+            } else {
+                completion(.success(success))
+            }
         })
     }
 
@@ -221,7 +420,7 @@ public class DeviceWrapper: NSObject, ConnectableDeviceDelegate {
         completion: @escaping (Result<Any?, Error>) -> Void
     ) {
         guard hasCapability(.muteSet) else {
-            let error = CustomError(message: "Device doesn't have volume set control capability")
+            let error = CustomError(message: "Device doesn't have volume set control capability", code: 505)
             completion(.failure(error))
             return
         }
@@ -229,7 +428,7 @@ public class DeviceWrapper: NSObject, ConnectableDeviceDelegate {
         device.volumeControl().setMute(mute) { res in
             completion(.success(res))
         } failure: { err in
-            completion(.failure(err ?? CustomError(message: "Can't mute device")))
+            completion(.failure(err ?? CustomError(message: "Can't mute device", code: 505)))
         }
     }
 
@@ -245,7 +444,7 @@ public class DeviceWrapper: NSObject, ConnectableDeviceDelegate {
         completion: @escaping (Result<Any?, Error>) -> Void
     ) {
         guard hasCapability(.volumeSet) else {
-            let error = CustomError(message: "Device doesn't have volume upDown control capability")
+            let error = CustomError(message: "Device doesn't have volume upDown control capability", code: 505)
             completion(.failure(error))
             return
         }
@@ -253,7 +452,7 @@ public class DeviceWrapper: NSObject, ConnectableDeviceDelegate {
         device.volumeControl().setVolume(volume) { res in
             completion(.success(res))
         } failure: { err in
-            completion(.failure(err ?? CustomError(message: "Can't set the volume")))
+            completion(.failure(err ?? CustomError(message: "Can't set the volume", code: 505)))
         }
     }
 
@@ -280,7 +479,7 @@ public class DeviceWrapper: NSObject, ConnectableDeviceDelegate {
         completion: @escaping (Result<MediaLaunchObject?, Error>) -> Void
     ) {
         guard let mediaPlayer = device?.mediaPlayer() else {
-            let error = CustomError(message: "Media player not available")
+            let error = CustomError(message: "Media player not available", code: 505)
             completion(.failure(error))
             return
         }
@@ -289,7 +488,7 @@ public class DeviceWrapper: NSObject, ConnectableDeviceDelegate {
             self.launchObject = mediaLaunchObject
             completion(.success(mediaLaunchObject))
         } failure: { error in
-            completion(.failure(error ?? CustomError(message: "Can't play media")))
+            completion(.failure(error ?? CustomError(message: "Can't play media", code: 505)))
         }
     }
 
@@ -321,10 +520,10 @@ public class DeviceWrapper: NSObject, ConnectableDeviceDelegate {
                     break
                 }
             }, failure: { error in
-                completion(.failure(error ?? CustomError(message: "Can't get playing state on media control")))
+                completion(.failure(error ?? CustomError(message: "Can't get playing state on media control", code: 505)))
             })
         } else {
-            let error = CustomError(message: "Can't get playing state on \(String(describing: launchObject?.mediaControl)) media control")
+            let error = CustomError(message: "Can't get playing state on \(String(describing: launchObject?.mediaControl)) media control", code: 505)
             completion(.failure(error))
         }
     }
@@ -341,10 +540,10 @@ public class DeviceWrapper: NSObject, ConnectableDeviceDelegate {
             mediaControl.play(success: { result in
                 completion(.success(result))
             }, failure: { error in
-                completion(.failure(error ?? CustomError(message: "Can't play media control")))
+                completion(.failure(error ?? CustomError(message: "Can't play media control", code: 505)))
             })
         } else {
-            let error = CustomError(message: "Can't play \(String(describing: launchObject?.mediaControl)) media control")
+            let error = CustomError(message: "Can't play \(String(describing: launchObject?.mediaControl)) media control", code: 505)
             completion(.failure(error))
         }
     }
@@ -361,10 +560,10 @@ public class DeviceWrapper: NSObject, ConnectableDeviceDelegate {
             mediaControl.pause(success: { res in
                 completion(.success(res))
             }, failure: { error in
-                completion(.failure(error ?? CustomError(message: "Can't pause media control")))
+                completion(.failure(error ?? CustomError(message: "Can't pause media control", code: 505)))
             })
         } else {
-            let error = CustomError(message: "Can't pause \(String(describing: launchObject?.mediaControl)) media control")
+            let error = CustomError(message: "Can't pause \(String(describing: launchObject?.mediaControl)) media control", code: 505)
             completion(.failure(error))
         }
     }
@@ -384,10 +583,10 @@ public class DeviceWrapper: NSObject, ConnectableDeviceDelegate {
             mediaControl.seek(position, success: { res in
                 completion(.success(res))
             }, failure: { err in
-                completion(.failure(err ?? CustomError(message: "Can't seek media control")))
+                completion(.failure(err ?? CustomError(message: "Can't seek media control", code: 505)))
             })
         } else {
-            let error = CustomError(message: "Can't seek \(String(describing: launchObject?.mediaControl)) media control")
+            let error = CustomError(message: "Can't seek \(String(describing: launchObject?.mediaControl)) media control", code: 505)
             completion(.failure(error))
         }
     }
@@ -403,10 +602,10 @@ public class DeviceWrapper: NSObject, ConnectableDeviceDelegate {
             session.close(success: { res in
                 completion(.success(res))
             }, failure: { error in
-                completion(.failure(error ?? CustomError(message: "Cannot close session")))
+                completion(.failure(error ?? CustomError(message: "Cannot close session", code: 505)))
             })
         } else {
-            let error = CustomError(message: "Cannot close \(String(describing: launchObject?.session)) session")
+            let error = CustomError(message: "Cannot close \(String(describing: launchObject?.session)) session", code: 505)
             completion(.failure(error))
         }
     }
@@ -423,10 +622,10 @@ public class DeviceWrapper: NSObject, ConnectableDeviceDelegate {
             device.mediaPlayer()?.closeMedia(launchSession, success: { res in
                 completion(.success(res))
             }, failure: { error in
-                completion(.failure(error ?? CustomError(message: "Cannot close session")))
+                completion(.failure(error ?? CustomError(message: "Cannot close session", code: 505)))
             })
         } else {
-            let error = CustomError(message: "Cannot close \(String(describing: launchObject?.session)) session")
+            let error = CustomError(message: "Cannot close \(String(describing: launchObject?.session)) session", code: 505)
             completion(.failure(error))
         }
     }

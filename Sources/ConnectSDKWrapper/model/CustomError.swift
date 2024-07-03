@@ -13,5 +13,6 @@ import Foundation
 public struct CustomError: Error {
     /// The error message.
     let message: String
+    let code: Int
 }
 

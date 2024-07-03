@@ -7,13 +7,26 @@
 
 import Foundation
 import ConnectSDK
+import SmartView
 
 /**
  A wrapper for a ConnectSDK DeviceService.
  */
 public struct DeviceServiceWrapper {
     /// The underlying ConnectSDK DeviceService.
-    private let deviceService: DeviceService
+    private var deviceService: DeviceService? = nil
+    
+    /// The underlying SmartView Service.
+    private var smartViewService: Service? = nil
+    
+    /**
+     Initializes a new DeviceServiceWrapper with the specified DeviceService.
+     
+     - Parameter deviceService: The DeviceService to wrap.
+     */
+    init(_ service: Service) {
+        self.smartViewService = service
+    }
     
     /**
      Initializes a new DeviceServiceWrapper with the specified DeviceService.
@@ -26,24 +39,24 @@ public struct DeviceServiceWrapper {
     
     /// Indicates whether the service is connectable.
     public var isConnectable: Bool {
-        return deviceService.isConnectable
+        return deviceService?.isConnectable ?? true
     }
     
     /// The name of the service.
-    public var name: String {
-        return deviceService.serviceName
+    public var name: String? {
+        return deviceService?.serviceName ?? smartViewService?.name
     }
     
     /// Indicates whether the service requires pairing.
     public var requiresPairing: Bool {
-        return deviceService.requiresPairing
+        return deviceService?.requiresPairing ?? true
     }
     
     /// The capabilities of the service.
     public var capabilities: [MediaControl] {
-        return deviceService.capabilities
+        return deviceService?.capabilities
             .compactMap { $0 as? String }
-            .compactMap { MediaControl(rawValue: $0) }
+            .compactMap { MediaControl(rawValue: $0) } ?? []
     }
     
     /**
@@ -53,7 +66,7 @@ public struct DeviceServiceWrapper {
      - Returns: `true` if the service has the capability, otherwise `false`.
      */
     public func hasCapability(_ capability: MediaControl) -> Bool {
-        return deviceService.hasCapability(capability.rawValue)
+        return deviceService?.hasCapability(capability.rawValue) ?? true
     }
     
     /**

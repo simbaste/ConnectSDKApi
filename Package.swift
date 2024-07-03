@@ -12,7 +12,7 @@ let package = Package(
         // Products define the executables and libraries a package produces, making them visible to other packages.
         .library(
             name: "ConnectSDKWrapper",
-            targets: ["ConnectSDKWrapper", "ConnectSDK"]),
+            targets: ["ConnectSDKWrapper", "ConnectSDK", "SmartView"]),
     ],
     targets: [
         // Targets are the basic building blocks of a package, defining a module or a test suite.
@@ -21,12 +21,16 @@ let package = Package(
             name: "ConnectSDKWrapper"
         ),
         .binaryTarget(
+            name: "SmartView",
+            path: "Libraries/SmartView.xcframework"
+        ),
+        .binaryTarget(
             name: "ConnectSDK",
             path: "Libraries/ConnectSDK.xcframework"
         ),
 
         .testTarget(
             name: "ConnectSDKWrapperTests",
-            dependencies: ["ConnectSDKWrapper", "ConnectSDK"]),
+            dependencies: ["ConnectSDKWrapper", "ConnectSDK", "SmartView"]),
     ]
 )
