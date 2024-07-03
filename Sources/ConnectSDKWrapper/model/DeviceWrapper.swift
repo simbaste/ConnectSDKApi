@@ -67,7 +67,7 @@ public class DeviceWrapper: NSObject, ConnectableDeviceDelegate {
     
     /// The name of the device.
     public var name: String? {
-        return device?.friendlyName ?? smartViewService?.id ?? fakeDevice?.name
+        return device?.friendlyName ?? smartViewService?.name ?? fakeDevice?.name
     }
     
     /// The modelName of the device
@@ -266,6 +266,7 @@ public class DeviceWrapper: NSObject, ConnectableDeviceDelegate {
        - urlString: The URL string to open in the browser.
        - completion: A closure to be called upon successful launch, taking a result containing either a LaunchSession or an Error.
      */
+    @available(*, deprecated, message: "Use launchGame() instead.")
     public func openBrowser(
         with urlString: String,
         completion: @escaping (Result<ApplicationState, Error>) -> Void
@@ -289,11 +290,45 @@ public class DeviceWrapper: NSObject, ConnectableDeviceDelegate {
     /**
      Launch a smartView application on the device
      - Parameters:
+        - companionAppUrl: The companion App url
         - appId: The ID of the application to launch.
         - channelIdURI: The channel URL for the application.
         - args: Otional arguments for teh application.
         - completion: A closure to be called upon success, taking a result containing either a Bool or an Error.
      */
+    public func launchGame(
+        companionAppUrl: String,
+        appId: NSURL,
+        channelID: String,
+        args: [String: String],
+        completion: @escaping (Result<ApplicationState, Error>) -> Void
+    ) {
+        if device != nil {
+            var urlComponents = URLComponents(string: companionAppUrl)
+            var queryItems = [URLQueryItem]()
+            for (key, value) in args {
+                queryItems.append(URLQueryItem(name: key, value: value))
+            }
+            urlComponents?.queryItems = queryItems
+            guard let urlString = urlComponents?.url?.absoluteString else {
+                completion(.failure(CustomError(message: "Invalid URL", code: 422)))
+                return
+            }
+            openBrowser(with: urlString, completion: completion)
+        } else if smartViewService != nil {
+            launchSmartViewGame(appId: appId, channelID: channelID, args: args, completion: completion)
+        }
+    }
+    
+    /**
+     Launch a smartView application on the device
+     - Parameters:
+        - appId: The ID of the application to launch.
+        - channelIdURI: The channel URL for the application.
+        - args: Otional arguments for teh application.
+        - completion: A closure to be called upon success, taking a result containing either a Bool or an Error.
+     */
+    @available(*, deprecated, message: "Use launchGame() instead")
     public func launchSmartViewGame(
         appId: NSURL,
         channelID: String,

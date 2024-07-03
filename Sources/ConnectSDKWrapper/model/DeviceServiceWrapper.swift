@@ -44,7 +44,10 @@ public struct DeviceServiceWrapper {
     
     /// The name of the service.
     public var name: String? {
-        return deviceService?.serviceName ?? smartViewService?.name
+        if (smartViewService != nil) {
+            return "SmartView"
+        }
+        return deviceService?.serviceName
     }
     
     /// Indicates whether the service requires pairing.
