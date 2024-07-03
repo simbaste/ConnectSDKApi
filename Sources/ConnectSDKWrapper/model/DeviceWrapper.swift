@@ -238,7 +238,7 @@ public class DeviceWrapper: NSObject, ConnectableDeviceDelegate {
                         self.delegate?.didRequirePairing(ofType: 101, with: self, service: DeviceServiceWrapper(self.smartViewService!))
                     }
                 })
-            } else if let client = client {
+            } else if client != nil {
                 self.delegate?.didConnect(device: self)
             } else {
                 self.delegate?.didFailToPair(
@@ -253,7 +253,7 @@ public class DeviceWrapper: NSObject, ConnectableDeviceDelegate {
     public func disconnect() {
         device?.disconnect()
         smartViewApplication?.disconnect({ client, error in
-            if let client = client {
+            if client != nil {
                 self.delegate?.didDisconnect(device: self, withError: error)
             }
         })
@@ -300,7 +300,7 @@ public class DeviceWrapper: NSObject, ConnectableDeviceDelegate {
         args: [String: String],
         completion: @escaping (Result<ApplicationState, Error>) -> Void
     ) {
-        guard let smartViewService = smartViewService else {
+        guard smartViewService != nil else {
             let error = NSError(domain: "com.netgem", code: 1001, userInfo: [NSLocalizedDescriptionKey: "SmartView service not available"])
             completion(.failure(error))
             return
@@ -361,7 +361,7 @@ public class DeviceWrapper: NSObject, ConnectableDeviceDelegate {
                             completion(.success(.installing))
                         }
                     })
-                } else if let client = client {
+                } else if client != nil {
                     completion(.success(.lauched))
                 } else {
                     completion(.failure(CustomError(message: "Failled to launch game on TV", code: 502)))
