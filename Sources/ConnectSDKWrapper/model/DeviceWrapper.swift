@@ -271,14 +271,13 @@ public class DeviceWrapper: NSObject, ConnectableDeviceDelegate {
         print("connectToSmartView with appId ==> \(String(describing: appId))")
         
         let application = try getSmartViewApp(appId, channelID, startArgs: startArgs)
-        
         getApplicationInfo(application: application) { appInfo in
             switch appInfo {
             case .needParing:
                 self.delegate?.didRequirePairing(ofType: 101, with: self, service: DeviceServiceWrapper(self.smartViewService!))
             case .failedParing(error: let error):
                 self.delegate?.didFailToPair(device: self, service: DeviceServiceWrapper(self.smartViewService!), withError: error)
-            case .retrievedInfo(info: let info):
+            case .retrievedInfo(info: _):
                 self.connectToSmartViewApplication(application)
             case .retrievedInfoFailed(error: let error):
                 self.delegate?.didFailToPair(device: self, service: DeviceServiceWrapper(self.smartViewService!), withError: error)
@@ -397,10 +396,6 @@ public class DeviceWrapper: NSObject, ConnectableDeviceDelegate {
             return
         }
         
-        var startArgs: [String: AnyObject] = [:]
-        for (key, value) in args {
-            startArgs[key] = value as AnyObject
-        }
         
         do {
             let application = try getSmartViewApp(appId, channelID, startArgs: args)
@@ -410,7 +405,7 @@ public class DeviceWrapper: NSObject, ConnectableDeviceDelegate {
                     self.delegate?.didRequirePairing(ofType: 101, with: self, service: DeviceServiceWrapper(self.smartViewService!))
                 case .failedParing(error: let error):
                     self.delegate?.didFailToPair(device: self, service: DeviceServiceWrapper(self.smartViewService!), withError: error)
-                case .retrievedInfo(info: let info):
+                case .retrievedInfo(info: _):
                     print("application isConnected ==> \(String(describing: application.isConnected))")
                     if (application.isConnected) {
                         self.sendMessageToSmartViewApp(application: application, args: args, completion: completion)
