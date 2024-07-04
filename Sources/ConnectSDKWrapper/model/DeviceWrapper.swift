@@ -198,16 +198,10 @@ public class DeviceWrapper: NSObject, ConnectableDeviceDelegate {
         device?.connect()
     }
     
-    private func connectToSmartView(_ appId: NSURL, _ channelID: String) throws {
-        print("connectToSmartView with appId ==> \(String(describing: appId))")
-        if smartViewApplication?.uri != appId.absoluteString {
-            smartViewApplication = smartViewService.createApplication(appId, channelURI: channelID, args: nil)
-        }
-        guard let application = smartViewApplication else {
-            throw CustomError(message: "Cannot create SmartView application", code: 404)
-        }
-        
-        
+    private func getApplicationInfo(
+        application: Application,
+        completion: @escaping (ApplicationInfo) -> Void
+    ) {
         application.getInfo({ info, error in
             if let error = error, error.code == 404 {
                 // Install the application on the TV
@@ -215,18 +209,25 @@ public class DeviceWrapper: NSObject, ConnectableDeviceDelegate {
                 // The user will still have to acknowledge by selecting "install" using the TV remmote.
                 application.install({ success, error in
                     if let error = error {
-                        self.delegate?.didFailToPair(device: self, service: DeviceServiceWrapper(self.smartViewService!), withError: error)
+//                        self.delegate?.didFailToPair(device: self, service: DeviceServiceWrapper(self.smartViewService!), withError: error)
+                        completion(.failedParing(error: error))
                     } else {
-                        self.delegate?.didRequirePairing(ofType: 101, with: self, service: DeviceServiceWrapper(self.smartViewService!))
+//                        self.delegate?.didRequirePairing(ofType: 101, with: self, service: DeviceServiceWrapper(self.smartViewService!))
+                        completion(.needParing)
                     }
                 })
+            } else if let error = error {
+                completion(.retrievedInfoFailed(error: error))
             } else {
                 print("application info = \(String(describing: info))")
+                completion(.retrievedInfo(info: info))
             }
         })
-        
+    }
+    
+    private func connectToSmartViewApplication(_ application: Application, startArgs: [String: String]? = nil) {
         print("application isConnected ==> \(String(describing: application.isConnected))")
-        application.connect(nil) { client, error in
+        application.connect(startArgs) { client, error in
             if let error = error, error.code == 404 {
                 // Install the application on the TV
                 // Note: Thos will only bring up the installation page on the TV
@@ -238,13 +239,49 @@ public class DeviceWrapper: NSObject, ConnectableDeviceDelegate {
                         self.delegate?.didRequirePairing(ofType: 101, with: self, service: DeviceServiceWrapper(self.smartViewService!))
                     }
                 })
-            } else if client != nil {
-                self.delegate?.didConnect(device: self)
+            } else if let error = error {
+                self.delegate?.didFailToPair(device: self, service: DeviceServiceWrapper(self.smartViewService!), withError: error)
             } else {
-                self.delegate?.didFailToPair(
-                    device: self,
-                    service: DeviceServiceWrapper(self.smartViewService!),
-                    withError: error ?? CustomError(message: "Failled to connect to device", code: 500))
+                self.delegate?.didConnect(device: self)
+            }
+        }
+    }
+    
+    private func getSmartViewApp(_ appId: NSURL, _ channelID: String, startArgs: [String: String] = [:]) throws -> Application {
+        if smartViewApplication?.uri != appId.absoluteString {
+            
+            do {
+                let data = try JSONSerialization.data(withJSONObject: startArgs, options: .prettyPrinted)
+                let args: [String: AnyObject] = [
+                    "id": String(data: data, encoding: .utf8) as AnyObject
+                ]
+                smartViewApplication = smartViewService.createApplication(appId, channelURI: channelID, args: args)
+            } catch {
+                throw CustomError(message: "Invalid arguments", code: 422)
+            }
+        }
+        guard let application = smartViewApplication else {
+            throw CustomError(message: "Cannot create SmartView application", code: 404)
+        }
+        
+        return application
+    }
+    
+    private func connectToSmartView(_ appId: NSURL, _ channelID: String, startArgs: [String: String] = [:]) throws {
+        print("connectToSmartView with appId ==> \(String(describing: appId))")
+        
+        let application = try getSmartViewApp(appId, channelID, startArgs: startArgs)
+        
+        getApplicationInfo(application: application) { appInfo in
+            switch appInfo {
+            case .needParing:
+                self.delegate?.didRequirePairing(ofType: 101, with: self, service: DeviceServiceWrapper(self.smartViewService!))
+            case .failedParing(error: let error):
+                self.delegate?.didFailToPair(device: self, service: DeviceServiceWrapper(self.smartViewService!), withError: error)
+            case .retrievedInfo(info: let info):
+                self.connectToSmartViewApplication(application)
+            case .retrievedInfoFailed(error: let error):
+                self.delegate?.didFailToPair(device: self, service: DeviceServiceWrapper(self.smartViewService!), withError: error)
             }
         }
     }
@@ -320,6 +357,25 @@ public class DeviceWrapper: NSObject, ConnectableDeviceDelegate {
         }
     }
     
+    private func sendMessageToSmartViewApp(
+        application: Application,
+        args: [String: String],
+        completion: @escaping (Result<ApplicationState, Error>) -> Void
+    ) {
+        do {
+            let jsonData = try JSONSerialization.data(withJSONObject: args)
+            if let jsonString = String(data: jsonData, encoding: .utf8) {
+                let anyObject: AnyObject = jsonString as AnyObject
+                application.publish(event: "play", message: anyObject)
+                completion(.success(.communicate))
+            } else {
+                completion(.failure(CustomError(message: "Failed to format arguments", code: 422)))
+            }
+        } catch {
+            completion(.failure(CustomError(message: "Failed to send message to TV", code: 502)))
+        }
+    }
+    
     /**
      Launch a smartView application on the device
      - Parameters:
@@ -345,64 +401,37 @@ public class DeviceWrapper: NSObject, ConnectableDeviceDelegate {
         for (key, value) in args {
             startArgs[key] = value as AnyObject
         }
-
-        guard let application = smartViewApplication else {
-            completion(.failure(CustomError(message: "Cannot create SmartView application", code: 505)))
-            return
-        }
         
-        
-        application.getInfo({ info, error in
-            if let error = error, error.code == 404 {
-                // Install the application on the TV
-                // Note: Thos will only bring up the installation page on the TV
-                // The user will still have to acknowledge by selecting "install" using the TV remmote.
-                application.install({ success, error in
-                    if let error = error {
-                        completion(.failure(error))
+        do {
+            let application = try getSmartViewApp(appId, channelID, startArgs: args)
+            getApplicationInfo(application: application) { appInfo in
+                switch appInfo {
+                case .needParing:
+                    self.delegate?.didRequirePairing(ofType: 101, with: self, service: DeviceServiceWrapper(self.smartViewService!))
+                case .failedParing(error: let error):
+                    self.delegate?.didFailToPair(device: self, service: DeviceServiceWrapper(self.smartViewService!), withError: error)
+                case .retrievedInfo(info: let info):
+                    print("application isConnected ==> \(String(describing: application.isConnected))")
+                    if (application.isConnected) {
+                        self.sendMessageToSmartViewApp(application: application, args: args, completion: completion)
                     } else {
-                        completion(.success(.installing))
+                        self.connectToSmartViewApplication(application)
                     }
-                })
-            } else {
-                print("application info = \(String(describing: info))")
-            }
-        })
-        
-        print("application isConnected ==> \(String(describing: application.isConnected))")
-        if application.isConnected {
-            do {
-                let jsonData = try JSONSerialization.data(withJSONObject: args)
-                if let jsonString = String(data: jsonData, encoding: .utf8) {
-                    let anyObject: AnyObject = jsonString as AnyObject
-                    application.publish(event: "play", message: anyObject)
-                    completion(.success(.communicate))
-                } else {
-                    completion(.failure(CustomError(message: "Failled to format arguments", code: 422)))
+                case .retrievedInfoFailed(error: let error):
+                    self.delegate?.didFailToPair(device: self, service: DeviceServiceWrapper(self.smartViewService!), withError: error)
                 }
-            } catch {
-                completion(.failure(CustomError(message: "Failled to send message to TV", code: 502)))
             }
-        } else {
-            application.connect(args, completionHandler: { client, error in
-                if let error = error, error.code == 404 {
-                    // Install the application on the TV
-                    // Note: Thos will only bring up the installation page on the TV
-                    // The user will still have to acknowledge by selecting "install" using the TV remmote.
-                    application.install({ success, error in
-                        if let error = error {
-                            completion(.failure(error))
-                        } else {
-                            completion(.success(.installing))
-                        }
-                    })
-                } else if client != nil {
-                    completion(.success(.lauched))
-                } else {
-                    completion(.failure(CustomError(message: "Failled to launch game on TV", code: 502)))
-                }
-            })
+        } catch let error {
+            completion(.failure(error))
         }
+        
+        
+        
+        
+        
+        
+        
+        
         
     }
 
