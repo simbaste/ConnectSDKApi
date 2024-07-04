@@ -225,7 +225,11 @@ public class DeviceWrapper: NSObject, ConnectableDeviceDelegate {
         })
     }
     
-    private func connectToSmartViewApplication(_ application: Application, startArgs: [String: String]? = nil) {
+    private func connectToSmartViewApplication(
+        _ application: Application,
+        startArgs: [String: String]? = nil,
+        completion: ((Result<ApplicationState, Error>) -> Void)? = nil
+    ) {
         print("application isConnected ==> \(String(describing: application.isConnected))")
         application.connect(startArgs) { client, error in
             if let error = error, error.code == 404 {
@@ -242,7 +246,11 @@ public class DeviceWrapper: NSObject, ConnectableDeviceDelegate {
             } else if let error = error {
                 self.delegate?.didFailToPair(device: self, service: DeviceServiceWrapper(self.smartViewService!), withError: error)
             } else {
-                self.delegate?.didConnect(device: self)
+                if let completion = completion {
+                    completion(.success(.communicate))
+                } else {
+                    self.delegate?.didConnect(device: self)
+                }
             }
         }
     }
@@ -278,7 +286,7 @@ public class DeviceWrapper: NSObject, ConnectableDeviceDelegate {
             case .failedParing(error: let error):
                 self.delegate?.didFailToPair(device: self, service: DeviceServiceWrapper(self.smartViewService!), withError: error)
             case .retrievedInfo(info: _):
-                self.connectToSmartViewApplication(application)
+                self.connectToSmartViewApplication(application, startArgs: startArgs)
             case .retrievedInfoFailed(error: let error):
                 self.delegate?.didFailToPair(device: self, service: DeviceServiceWrapper(self.smartViewService!), withError: error)
             }
@@ -396,21 +404,20 @@ public class DeviceWrapper: NSObject, ConnectableDeviceDelegate {
             return
         }
         
-        
         do {
             let application = try getSmartViewApp(appId, channelID, startArgs: args)
             getApplicationInfo(application: application) { appInfo in
                 switch appInfo {
                 case .needParing:
-                    self.delegate?.didRequirePairing(ofType: 101, with: self, service: DeviceServiceWrapper(self.smartViewService!))
+                    completion(.success(.needConnection))
                 case .failedParing(error: let error):
-                    self.delegate?.didFailToPair(device: self, service: DeviceServiceWrapper(self.smartViewService!), withError: error)
+                    completion(.failure(error))
                 case .retrievedInfo(info: _):
                     print("application isConnected ==> \(String(describing: application.isConnected))")
                     if (application.isConnected) {
                         self.sendMessageToSmartViewApp(application: application, args: args, completion: completion)
                     } else {
-                        self.connectToSmartViewApplication(application)
+                        self.connectToSmartViewApplication(application, startArgs: args)
                     }
                 case .retrievedInfoFailed(error: let error):
                     self.delegate?.didFailToPair(device: self, service: DeviceServiceWrapper(self.smartViewService!), withError: error)
@@ -419,14 +426,6 @@ public class DeviceWrapper: NSObject, ConnectableDeviceDelegate {
         } catch let error {
             completion(.failure(error))
         }
-        
-        
-        
-        
-        
-        
-        
-        
         
     }
 
