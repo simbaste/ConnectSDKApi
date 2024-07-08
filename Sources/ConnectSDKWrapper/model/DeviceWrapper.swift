@@ -265,7 +265,8 @@ public class DeviceWrapper: NSObject, ConnectableDeviceDelegate, ChannelDelegate
 //        }
         application.delegate = self
         application.connectionTimeout = 5
-        application.connect(["name": smartViewService.name])
+        application.connect(["name": UIDevice.current.name])
+        
     }
     
     private func getSmartViewApp(_ appId: NSURL, _ channelID: String, startArgs: [String: String] = [:]) throws -> Application {
