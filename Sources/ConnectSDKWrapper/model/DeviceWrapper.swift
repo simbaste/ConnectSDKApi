@@ -12,7 +12,7 @@ import SmartView
 /**
  A wrapper for a ConnectSDK ConnectableDevice.
  */
-public class DeviceWrapper: NSObject, ConnectableDeviceDelegate {
+public class DeviceWrapper: NSObject, ConnectableDeviceDelegate, ChannelDelegate {
     
     /// The underlying ConnectSDK ConnectableDevice.
     private var device: ConnectableDevice!
@@ -263,23 +263,9 @@ public class DeviceWrapper: NSObject, ConnectableDeviceDelegate {
 //                }
 //            }
 //        }
-        application.start { success, error in
-            if let error = error {
-                self.delegate?.didFailToPair(device: self, service: DeviceServiceWrapper(self.smartViewService!), withError: error)
-            } else {
-                application.connect(nil) { client, error in
-                    if let error = error {
-                        self.delegate?.didFailToPair(device: self, service: DeviceServiceWrapper(self.smartViewService!), withError: error)
-                    } else {
-                        if let completion = completion {
-                            completion(.success(.communicate))
-                        } else {
-                            self.delegate?.didConnect(device: self)
-                        }
-                    }
-                }
-            }
-        }
+        application.delegate = self
+        application.connectionTimeout = 5
+        application.connect(["name": smartViewService.name])
     }
     
     private func getSmartViewApp(_ appId: NSURL, _ channelID: String, startArgs: [String: String] = [:]) throws -> Application {
@@ -722,6 +708,38 @@ public class DeviceWrapper: NSObject, ConnectableDeviceDelegate {
 
     
     // MARK: - Delegate
+    
+    public func onReady() {
+        print("SmartView is ready")
+    }
+    
+    public func onMessage(_ message: Message) {
+        print("Receives new message ==> \(message)")
+    }
+    
+    public func onClientConnect(_ client: ChannelClient) {
+        print("onClientConnent ==> \(client)")
+    }
+    
+    public func onClientDisconnect(_ client: ChannelClient) {
+        print("onClientDisconnect ==> \(client)")
+    }
+    
+    public func onData(_ message: Message, payload: Data) {
+        print("onData ==> message: \(message), payload: \(payload)")
+    }
+    
+    public func onConnect(_ client: ChannelClient?, error: NSError?) {
+        print("onConnect ==> client: \(String(describing: client)), error \(String(describing: error))")
+    }
+    
+    public func onDisconnect(_ client: ChannelClient?, error: NSError?) {
+        print("onDisconnect ==> client: \(String(describing: client)), error \(String(describing: error))")
+    }
+    
+    public func onError(_ error: NSError) {
+        print("onError ==> error: \(String(describing: error))")
+    }
     
     /**
      Called when the device is ready.
