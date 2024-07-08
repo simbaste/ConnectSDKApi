@@ -748,6 +748,7 @@ public class DeviceWrapper: NSObject, ConnectableDeviceDelegate, ChannelDelegate
     
     public func onDisconnect(_ client: ChannelClient?, error: NSError?) {
         print("onDisconnect ==> client: \(String(describing: client)), error \(String(describing: error))")
+        delegate?.didDisconnect(device: self, withError: error)
     }
     
     public func onError(_ error: NSError) {
