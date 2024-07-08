@@ -241,7 +241,7 @@ public class DeviceWrapper: NSObject, ConnectableDeviceDelegate {
         completion: ((Result<ApplicationState, Error>) -> Void)? = nil
     ) {
         print("application isConnected ==> \(String(describing: application.isConnected))")
-        application.connect(startArgs) { client, error in
+        application.connect(nil) { client, error in
             if let error = error, error.code == 404 {
                 // Install the application on the TV
                 // Note: Thos will only bring up the installation page on the TV
