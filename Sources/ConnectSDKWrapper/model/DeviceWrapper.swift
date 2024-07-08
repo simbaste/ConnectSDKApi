@@ -295,8 +295,13 @@ public class DeviceWrapper: NSObject, ConnectableDeviceDelegate {
                 self.delegate?.didRequirePairing(ofType: 101, with: self, service: DeviceServiceWrapper(self.smartViewService!))
             case .failedParing(error: let error):
                 self.delegate?.didFailToPair(device: self, service: DeviceServiceWrapper(self.smartViewService!), withError: error)
-            case .retrievedInfo(info: _):
-                self.connectToSmartViewApplication(application, startArgs: startArgs)
+            case .retrievedInfo(info: let info):
+                if let isRunning = info?["running"] as? Decimal, isRunning == 0 {
+                    // Send message to applicarion
+                    self.connectToSmartViewApplication(application, startArgs: startArgs)
+                } else {
+                    self.connectToSmartViewApplication(application, startArgs: startArgs)
+                }
             case .retrievedInfoFailed(error: let error):
                 self.delegate?.didFailToPair(device: self, service: DeviceServiceWrapper(self.smartViewService!), withError: error)
             }
