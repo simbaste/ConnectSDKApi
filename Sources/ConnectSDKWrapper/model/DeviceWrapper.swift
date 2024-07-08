@@ -732,6 +732,18 @@ public class DeviceWrapper: NSObject, ConnectableDeviceDelegate, ChannelDelegate
     
     public func onConnect(_ client: ChannelClient?, error: NSError?) {
         print("onConnect ==> client: \(String(describing: client)), error \(String(describing: error))")
+        if let error = error {
+            delegate?.didFailToPair(device: self, service: DeviceServiceWrapper(self.smartViewService!), withError: error)
+        } else {
+            delegate?.didConnect(device: self)
+            smartViewApplication.start { success, error in
+                if let error = error {
+                    print("error ==> \(error)")
+                } else {
+                    print("start succeed")
+                }
+            }
+        }
     }
     
     public func onDisconnect(_ client: ChannelClient?, error: NSError?) {
