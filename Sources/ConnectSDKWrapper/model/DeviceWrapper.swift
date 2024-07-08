@@ -219,10 +219,8 @@ public class DeviceWrapper: NSObject, ConnectableDeviceDelegate, ChannelDelegate
                 // The user will still have to acknowledge by selecting "install" using the TV remmote.
                 application.install({ success, error in
                     if let error = error {
-//                        self.delegate?.didFailToPair(device: self, service: DeviceServiceWrapper(self.smartViewService!), withError: error)
                         completion(.failedParing(error: error))
                     } else {
-//                        self.delegate?.didRequirePairing(ofType: 101, with: self, service: DeviceServiceWrapper(self.smartViewService!))
                         completion(.needParing)
                     }
                 })
@@ -265,7 +263,15 @@ public class DeviceWrapper: NSObject, ConnectableDeviceDelegate, ChannelDelegate
 //        }
         application.delegate = self
         application.connectionTimeout = 5
-        application.connect(["name": UIDevice.current.name])
+//        application.connect(startArgs)
+        application.start { success, error in
+            if let error = error {
+                self.delegate?.didFailToPair(device: self, service: DeviceServiceWrapper(self.smartViewService!), withError: error)
+            } else {
+                print("The has started")
+                application.connect(startArgs)
+            }
+        }
         
     }
     
