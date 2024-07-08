@@ -241,25 +241,42 @@ public class DeviceWrapper: NSObject, ConnectableDeviceDelegate {
         completion: ((Result<ApplicationState, Error>) -> Void)? = nil
     ) {
         print("application isConnected ==> \(String(describing: application.isConnected))")
-        application.connect(nil) { client, error in
-            if let error = error, error.code == 404 {
-                // Install the application on the TV
-                // Note: Thos will only bring up the installation page on the TV
-                // The user will still have to acknowledge by selecting "install" using the TV remmote.
-                application.install({ success, error in
+//        application.connect(nil) { client, error in
+//            if let error = error, error.code == 404 {
+//                // Install the application on the TV
+//                // Note: Thos will only bring up the installation page on the TV
+//                // The user will still have to acknowledge by selecting "install" using the TV remmote.
+//                application.install({ success, error in
+//                    if let error = error {
+//                        self.delegate?.didFailToPair(device: self, service: DeviceServiceWrapper(self.smartViewService!), withError: error)
+//                    } else {
+//                        self.delegate?.didRequirePairing(ofType: 101, with: self, service: DeviceServiceWrapper(self.smartViewService!))
+//                    }
+//                })
+//            } else if let error = error {
+//                self.delegate?.didFailToPair(device: self, service: DeviceServiceWrapper(self.smartViewService!), withError: error)
+//            } else {
+//                if let completion = completion {
+//                    completion(.success(.communicate))
+//                } else {
+//                    self.delegate?.didConnect(device: self)
+//                }
+//            }
+//        }
+        application.start { success, error in
+            if let error = error {
+                self.delegate?.didFailToPair(device: self, service: DeviceServiceWrapper(self.smartViewService!), withError: error)
+            } else {
+                application.connect(nil) { client, error in
                     if let error = error {
                         self.delegate?.didFailToPair(device: self, service: DeviceServiceWrapper(self.smartViewService!), withError: error)
                     } else {
-                        self.delegate?.didRequirePairing(ofType: 101, with: self, service: DeviceServiceWrapper(self.smartViewService!))
+                        if let completion = completion {
+                            completion(.success(.communicate))
+                        } else {
+                            self.delegate?.didConnect(device: self)
+                        }
                     }
-                })
-            } else if let error = error {
-                self.delegate?.didFailToPair(device: self, service: DeviceServiceWrapper(self.smartViewService!), withError: error)
-            } else {
-                if let completion = completion {
-                    completion(.success(.communicate))
-                } else {
-                    self.delegate?.didConnect(device: self)
                 }
             }
         }
