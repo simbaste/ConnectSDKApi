@@ -65,6 +65,16 @@ public class DeviceWrapper: NSObject, ConnectableDeviceDelegate {
         return device?.id
     }
     
+    public var type: DeviceWrapperType {
+        if device != nil {
+            return .webos
+        } else if smartViewService != nil {
+            return .smartview
+        } else {
+            return .unknown
+        }
+    }
+    
     /// The name of the device.
     public var name: String? {
         return device?.friendlyName ?? smartViewService?.name ?? fakeDevice?.name
