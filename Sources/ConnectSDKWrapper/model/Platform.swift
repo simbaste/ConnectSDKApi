@@ -13,4 +13,5 @@ public enum Platform: String {
     case netcast = "NetcastTVService"
     case ruku = "RokuService"
     case webos = "WebOSTVService"
+    case smartview = "SmartView"
 }

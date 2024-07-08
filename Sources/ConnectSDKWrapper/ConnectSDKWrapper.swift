@@ -30,7 +30,7 @@ public class ConnectSDKWrapper: NSObject, DiscoveryManagerDelegate, ServiceSearc
     private var discoveredDevices: Set<DeviceWrapper> = Set()
     
     /// SmartView Service Search
-    var serviceSearch: ServiceSearch!
+    var serviceSearch: ServiceSearch? = nil
     
     /**
      Initializes a new ConnectSDKWrapper.
@@ -41,15 +41,13 @@ public class ConnectSDKWrapper: NSObject, DiscoveryManagerDelegate, ServiceSearc
         discoveryManager.delegate = self
         DIALService.registerApp("Levak")
         
-        // Initialize and start SmartView service search
-        serviceSearch = Service.search()
-        serviceSearch.delegate = self
+    
     }
     
     public func destry() {
         self.discoveredDevices.removeAll()
         self.discoveryManager.stopDiscovery()
-        serviceSearch.stop() // Stop SmartView service search
+        serviceSearch?.stop() // Stop SmartView service search
         unregisterServices()
     }
     
@@ -59,7 +57,7 @@ public class ConnectSDKWrapper: NSObject, DiscoveryManagerDelegate, ServiceSearc
     public func searchForDevices() {
         self.discoveredDevices.removeAll()
         self.discoveryManager.startDiscovery()
-        serviceSearch.start()
+        serviceSearch?.start()
     }
     
     /**
@@ -67,7 +65,7 @@ public class ConnectSDKWrapper: NSObject, DiscoveryManagerDelegate, ServiceSearc
      */
     public func stopSearchingForDevices() {
         self.discoveryManager.stopDiscovery()
-        serviceSearch.stop() // Stop SmartView service Search
+        serviceSearch?.stop() // Stop SmartView service Search
     }
     
     /**
@@ -102,6 +100,10 @@ public class ConnectSDKWrapper: NSObject, DiscoveryManagerDelegate, ServiceSearc
             if let platformClass = NSClassFromString(platformClassName) as? NSObject.Type,
                let discoveryProviderClass = NSClassFromString(discoveryProviderClassName) as? DiscoveryProvider.Type {
                 discoveryManager.registerDeviceService(platformClass, withDiscovery: discoveryProviderClass)
+            } else if (platformClassName == Platform.smartview.rawValue) {
+                // Initialize and start SmartView service search
+                serviceSearch = Service.search()
+                serviceSearch?.delegate = self
             }
         }
     }
@@ -111,6 +113,8 @@ public class ConnectSDKWrapper: NSObject, DiscoveryManagerDelegate, ServiceSearc
             if let platformClass = NSClassFromString(platformClassName) as? NSObject.Type,
                let discoveryProviderClass = NSClassFromString(discoveryProviderClassName) as? DiscoveryProvider.Type {
                 discoveryManager.unregisterDeviceService(platformClass, withDiscovery: discoveryProviderClass)
+            } else if (platformClassName == Platform.smartview.rawValue) {
+                serviceSearch = nil
             }
         }
     }
