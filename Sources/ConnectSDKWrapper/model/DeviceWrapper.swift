@@ -736,13 +736,13 @@ public class DeviceWrapper: NSObject, ConnectableDeviceDelegate, ChannelDelegate
             delegate?.didFailToPair(device: self, service: DeviceServiceWrapper(self.smartViewService!), withError: error)
         } else {
             delegate?.didConnect(device: self)
-            smartViewApplication.start { success, error in
-                if let error = error {
-                    print("error ==> \(error)")
-                } else {
-                    print("start succeed")
-                }
-            }
+//            smartViewApplication.start { success, error in
+//                if let error = error {
+//                    print("error ==> \(error)")
+//                } else {
+//                    print("start succeed")
+//                }
+//            }
         }
     }
     
