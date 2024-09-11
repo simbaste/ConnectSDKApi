@@ -213,9 +213,10 @@ public class DeviceWrapper: NSObject, ConnectableDeviceDelegate, ChannelDelegate
         completion: @escaping (ApplicationInfo) -> Void
     ) {
         application.getInfo({ info, error in
+            print("info = \(String(describing: info)), error =  \(String(describing: error))")
             if let error = error, error.code == 404 {
                 // Install the application on the TV
-                // Note: Thos will only bring up the installation page on the TV
+                // Note: This will only bring up the installation page on the TV
                 // The user will still have to acknowledge by selecting "install" using the TV remmote.
                 application.install({ success, error in
                     if let error = error {
