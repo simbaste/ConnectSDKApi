@@ -264,15 +264,23 @@ public class DeviceWrapper: NSObject, ConnectableDeviceDelegate, ChannelDelegate
 //        }
         application.delegate = self
         application.connectionTimeout = 5
-//        application.connect(startArgs)
-        application.start { success, error in
+        application.connect(startArgs) { client, error in
+            print("connect to application: client = \(String(describing: client)), error = \(String(describing: error))")
             if let error = error {
                 self.delegate?.didFailToPair(device: self, service: DeviceServiceWrapper(self.smartViewService!), withError: error)
             } else {
-                print("The has started")
-                application.connect(startArgs)
+                self.delegate?.didConnect(device: self)
             }
         }
+//        application.connect(startArgs)
+//        application.start { success, error in
+//            if let error = error {
+//                self.delegate?.didFailToPair(device: self, service: DeviceServiceWrapper(self.smartViewService!), withError: error)
+//            } else {
+//                print("The has started")
+//                application.connect(startArgs)
+//            }
+//        }
         
     }
     
@@ -308,9 +316,11 @@ public class DeviceWrapper: NSObject, ConnectableDeviceDelegate, ChannelDelegate
                 self.delegate?.didFailToPair(device: self, service: DeviceServiceWrapper(self.smartViewService!), withError: error)
             case .retrievedInfo(info: let info):
                 if let isRunning = info?["running"] as? Decimal, isRunning == 0 {
+                    print("Application is running")
                     // Send message to applicarion
                     self.connectToSmartViewApplication(application, startArgs: startArgs)
                 } else {
+                    print("Application is not running: connect to it")
                     self.connectToSmartViewApplication(application, startArgs: startArgs)
                 }
             case .retrievedInfoFailed(error: let error):
