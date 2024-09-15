@@ -264,14 +264,15 @@ public class DeviceWrapper: NSObject, ConnectableDeviceDelegate, ChannelDelegate
 //        }
         application.delegate = self
         application.connectionTimeout = 5
-        application.connect(startArgs) { client, error in
-            print("connect to application: client = \(String(describing: client)), error = \(String(describing: error))")
-            if let error = error {
-                self.delegate?.didFailToPair(device: self, service: DeviceServiceWrapper(self.smartViewService!), withError: error)
-            } else {
-                self.delegate?.didConnect(device: self)
-            }
-        }
+//        application.connect(startArgs) { client, error in
+//            print("connect to application: client = \(String(describing: client)), error = \(String(describing: error))")
+//            if let error = error {
+//                self.delegate?.didFailToPair(device: self, service: DeviceServiceWrapper(self.smartViewService!), withError: error)
+//            } else {
+//                self.delegate?.didConnect(device: self)
+//            }
+//        }
+        application.connect()
 //        application.connect(startArgs)
 //        application.start { success, error in
 //            if let error = error {
